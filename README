@@ -1,3 +1,11 @@
+This is a fork of
+[pulseaudio](https://www.freedesktop.org/wiki/Software/PulseAudio/), packaged
+for Zig. Unnecessary files have been deleted, and the build system has been
+replaced with `build.zig`.
+
+Original README follows:
+--------------------------------------------------------------------------------
+
 PULSEAUDIO SOUND SERVER
 
 WEB SITE:
