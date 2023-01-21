@@ -56,6 +56,7 @@ pub fn build(b: *std.build.Builder) void {
         "src/pulsecore/iochannel.c",
         "src/pulsecore/ioline.c",
         "src/pulsecore/ipacl.c",
+        "src/pulsecore/json.c",
         "src/pulsecore/lock-autospawn.c",
         "src/pulsecore/log.c",
         "src/pulsecore/mcalign.c",
