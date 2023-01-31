@@ -1,12 +1,11 @@
 const std = @import("std");
 
 pub fn build(b: *std.build.Builder) void {
-    const target = b.standardTargetOptions(.{});
-    const mode = b.standardReleaseOptions();
-
-    const lib = b.addStaticLibrary("pulse", null);
-    lib.setTarget(target);
-    lib.setBuildMode(mode);
+    const lib = b.addStaticLibrary(.{
+        .name = "pulse",
+        .target = b.standardTargetOptions(.{}),
+        .optimize = b.standardOptimizeOption(.{}),
+    });
     lib.linkLibC();
     lib.addIncludePath("src");
     lib.addCSourceFiles(&.{
