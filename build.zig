@@ -240,13 +240,13 @@ pub fn build(b: *std.build.Builder) void {
         "-DHAVE_CONFIG_H=1",
         "-D_GNU_SOURCE",
     });
-    lib.install();
     lib.installHeadersDirectoryOptions(.{
         .source_dir = "src/pulse",
         .install_dir = .header,
         .install_subdir = "pulse",
         .exclude_extensions = &.{".c"},
     });
+    b.installArtifact(lib);
 }
 
 fn have(b: bool) ?c_int {
