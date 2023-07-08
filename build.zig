@@ -241,7 +241,7 @@ pub fn build(b: *std.build.Builder) void {
         "-D_GNU_SOURCE",
     });
     lib.installHeadersDirectoryOptions(.{
-        .source_dir = "src/pulse",
+        .source_dir = .{ .path = "src/pulse" },
         .install_dir = .header,
         .install_subdir = "pulse",
         .exclude_extensions = &.{".c"},
