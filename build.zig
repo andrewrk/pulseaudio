@@ -7,7 +7,7 @@ pub fn build(b: *std.build.Builder) void {
         .optimize = b.standardOptimizeOption(.{}),
     });
     lib.linkLibC();
-    lib.addIncludePath("src");
+    lib.addIncludePath(.{ .path = "src" });
 
     const t = lib.target_info.target;
     lib.addConfigHeader(b.addConfigHeader(.{
