@@ -1,0 +1,14 @@
+.{
+    .name = "pulseaudio",
+    .version = "16.1.0",
+    .dependencies = .{},
+    .paths = .{
+        "GPL",
+        "LGPL",
+        "LICENSE",
+        "README",
+        "build.zig",
+        "build.zig.zon",
+        "src",
+    },
+}
