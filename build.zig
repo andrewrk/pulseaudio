@@ -1,15 +1,18 @@
 const std = @import("std");
 
-pub fn build(b: *std.build.Builder) void {
+pub fn build(b: *std.Build) void {
+    const target = b.standardTargetOptions(.{});
+    const optimize = b.standardOptimizeOption(.{});
+    const t = target.result;
+
     const lib = b.addStaticLibrary(.{
         .name = "pulse",
-        .target = b.standardTargetOptions(.{}),
-        .optimize = b.standardOptimizeOption(.{}),
+        .target = target,
+        .optimize = optimize,
     });
     lib.linkLibC();
     lib.addIncludePath(.{ .path = "src" });
 
-    const t = lib.target_info.target;
     lib.addConfigHeader(b.addConfigHeader(.{
         .style = .blank,
     }, .{
