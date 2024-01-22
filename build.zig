@@ -13,9 +13,7 @@ pub fn build(b: *std.Build) void {
     lib.linkLibC();
     lib.addIncludePath(.{ .path = "src" });
 
-    lib.addConfigHeader(b.addConfigHeader(.{
-        .style = .blank,
-    }, .{
+    const config_values = .{
         .DESKTOPFILEDIR = "/usr/local/share/applications",
         .DISABLE_LIBTOOL_PRELOAD = 1,
         .DISABLE_ORC = 1,
@@ -126,7 +124,7 @@ pub fn build(b: *std.Build) void {
         .MESON_BUILD = 1,
         .PACKAGE = "pulseaudio",
         .PACKAGE_NAME = "pulseaudio",
-        .PACKAGE_VERSION = "14.2-dirty",
+        .PACKAGE_VERSION = "16.1-ge5ad",
         .PA_ACCESS_GROUP = "pulse-access",
         .PA_ALSA_PATHS_DIR = "/usr/local/share/pulseaudio/alsa-mixer/paths",
         .PA_ALSA_PROFILE_SETS_DIR = "/usr/local/share/pulseaudio/alsa-mixer/profile-sets",
@@ -135,14 +133,14 @@ pub fn build(b: *std.Build) void {
         .PA_BUILDDIR = "/home/pulseaudio/build",
         .PA_CFLAGS = "Not yet supported on meson",
         .PA_DEFAULT_CONFIG_DIR = "/usr/local/etc/pulse",
-        .PA_DLSEARCHPATH = "/usr/local/lib/pulse-14.2/modules",
+        .PA_DLSEARCHPATH = "/usr/local/lib/pulse-16.1/modules",
         .PA_INCDIR = .@"/usr/local/include",
         .PA_LIBDIR = .@"/usr/local/lib",
         .PA_MACHINE_ID = "/usr/local/etc/machine-id",
         .PA_MACHINE_ID_FALLBACK = "/var/local/lib/dbus/machine-id",
-        .PA_MAJOR = 14,
-        .PA_MINOR = 2,
-        .PA_PROTOCOL_VERSION = 34,
+        .PA_MAJOR = 16,
+        .PA_MINOR = 1,
+        .PA_PROTOCOL_VERSION = 35,
         .PA_SOEXT = ".so",
         .PA_SRCDIR = "/home/pulseaudio/src",
         .PA_SYSTEM_CONFIG_PATH = "/var/local/lib/pulse",
@@ -153,7 +151,17 @@ pub fn build(b: *std.Build) void {
         .PULSEDSP_LOCATION = .@"/usr/local/lib/pulseaudio",
         .PULSE_LOCALEDIR = "/usr/local/share/locale",
         .top_srcdir = .@"/home/pulseaudio",
-    }));
+    };
+
+    lib.addConfigHeader(b.addConfigHeader(.{
+        .style = .blank,
+    }, config_values));
+
+    const version_header = b.addConfigHeader(.{ .style = .{
+        .cmake = std.Build.LazyPath.relative("./src/pulse/version.h.in"),
+    } }, config_values);
+
+    lib.addConfigHeader(version_header);
 
     lib.addCSourceFiles(.{
         .files = &.{
@@ -250,8 +258,11 @@ pub fn build(b: *std.Build) void {
         .source_dir = .{ .path = "src/pulse" },
         .install_dir = .header,
         .install_subdir = "pulse",
-        .exclude_extensions = &.{".c"},
+        .exclude_extensions = &.{ ".c", ".h.in" },
     });
+
+    const install_version = b.addInstallFile(version_header.getOutput(), "include/pulse/version.h");
+    b.getInstallStep().dependOn(&install_version.step);
     b.installArtifact(lib);
 }
 
