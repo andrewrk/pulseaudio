@@ -261,8 +261,7 @@ pub fn build(b: *std.Build) void {
         .exclude_extensions = &.{ ".c", ".h.in" },
     });
 
-    const install_version = b.addInstallFile(version_header.getOutput(), "include/pulse/version.h");
-    b.getInstallStep().dependOn(&install_version.step);
+    lib.installConfigHeader(version_header, .{ .install_dir = .header, .dest_rel_path = "pulse/version.h" });
     b.installArtifact(lib);
 }
 
