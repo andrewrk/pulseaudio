@@ -157,9 +157,10 @@ pub fn build(b: *std.Build) void {
         .style = .blank,
     }, config_values));
 
-    const version_header = b.addConfigHeader(.{ .style = .{
-        .cmake = std.Build.LazyPath.relative("./src/pulse/version.h.in"),
-    } }, config_values);
+    const version_header = b.addConfigHeader(.{
+        .style = .{ .cmake = std.Build.LazyPath.relative("./src/pulse/version.h.in") },
+        .include_path = "pulse/version.h",
+    }, config_values);
 
     lib.addConfigHeader(version_header);
 
@@ -254,15 +255,11 @@ pub fn build(b: *std.Build) void {
             "-D_GNU_SOURCE",
         },
     });
-    lib.installHeadersDirectoryOptions(.{
-        .source_dir = .{ .path = "src/pulse" },
-        .install_dir = .header,
-        .install_subdir = "pulse",
+    lib.installHeadersDirectory(.{ .path = "src/pulse" }, "pulse", .{
         .exclude_extensions = &.{ ".c", ".h.in" },
     });
+    lib.installConfigHeader(version_header);
 
-    const install_version = b.addInstallFile(version_header.getOutput(), "include/pulse/version.h");
-    b.getInstallStep().dependOn(&install_version.step);
     b.installArtifact(lib);
 }
 
