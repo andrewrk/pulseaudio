@@ -11,7 +11,7 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
     lib.linkLibC();
-    lib.addIncludePath(.{ .path = "src" });
+    lib.addIncludePath(b.path("src"));
 
     const config_values = .{
         .DESKTOPFILEDIR = "/usr/local/share/applications",
@@ -158,7 +158,7 @@ pub fn build(b: *std.Build) void {
     }, config_values));
 
     const version_header = b.addConfigHeader(.{
-        .style = .{ .cmake = std.Build.LazyPath.relative("./src/pulse/version.h.in") },
+        .style = .{ .cmake = b.path("src/pulse/version.h.in") },
         .include_path = "pulse/version.h",
     }, config_values);
 
@@ -255,7 +255,7 @@ pub fn build(b: *std.Build) void {
             "-D_GNU_SOURCE",
         },
     });
-    lib.installHeadersDirectory(.{ .path = "src/pulse" }, "pulse", .{
+    lib.installHeadersDirectory(b.path("src/pulse"), "pulse", .{
         .exclude_extensions = &.{ ".c", ".h.in" },
     });
     lib.installConfigHeader(version_header);
