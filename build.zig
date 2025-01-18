@@ -259,8 +259,30 @@ pub fn build(b: *std.Build) void {
         .exclude_extensions = &.{ ".c", ".h.in" },
     });
     lib.installConfigHeader(version_header);
-
     b.installArtifact(lib);
+
+    const bindings = b.addModule("pulseaudio", .{
+        .root_source_file = b.path("bindings.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    bindings.linkLibrary(lib);
+
+    const sine_exe = b.addExecutable(.{
+        .name = "sine",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("example/sine.zig"),
+            .target = target,
+            .optimize = optimize,
+            .imports = &.{
+                .{
+                    .name = "pulseaudio",
+                    .module = bindings,
+                },
+            },
+        }),
+    });
+    b.installArtifact(sine_exe);
 }
 
 fn have(b: bool) ?c_int {
