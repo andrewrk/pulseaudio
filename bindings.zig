@@ -72,7 +72,7 @@ pub const context_notify_cb_t = *const fn (*context, ?*anyopaque) callconv(.c) v
 pub const context_event_cb_t = ?*const fn (*context, [*c]const u8, ?*proplist, ?*anyopaque) callconv(.c) void;
 pub const context_success_cb_t = ?*const fn (*context, c_int, ?*anyopaque) callconv(.c) void;
 pub const free_cb_t = *const fn (?*anyopaque) callconv(.c) void;
-pub const stream_success_cb_t = ?*const fn (*stream, c_int, ?*anyopaque) callconv(.c) void;
+pub const stream_success_cb_t = *const fn (*stream, c_int, ?*anyopaque) callconv(.c) void;
 pub const stream_notify_cb_t = ?*const fn (*stream, ?*anyopaque) callconv(.c) void;
 pub const stream_request_cb_t = ?*const fn (*stream, usize, ?*anyopaque) callconv(.c) void;
 pub const stream_event_cb_t = ?*const fn (*stream, [*c]const u8, ?*proplist, ?*anyopaque) callconv(.c) void;
@@ -258,7 +258,18 @@ pub const prop_type_t = enum(c_int) {
     STRING_ARRAY = 4,
     INVALID = -1,
 };
-pub const operation = opaque {};
+pub const operation = opaque {
+    pub const ref = pa_operation_ref;
+    extern fn pa_operation_ref(o: *operation) ?*operation;
+    pub const unref = pa_operation_unref;
+    extern fn pa_operation_unref(o: *operation) void;
+    pub const cancel = pa_operation_cancel;
+    extern fn pa_operation_cancel(o: *operation) void;
+    pub const get_state = pa_operation_get_state;
+    extern fn pa_operation_get_state(o: *const operation) operation_state_t;
+    pub const set_state_callback = pa_operation_set_state_callback;
+    extern fn pa_operation_set_state_callback(o: *operation, cb: operation_notify_cb_t, userdata: ?*anyopaque) void;
+};
 pub const operation_state_t = enum(c_uint) {
     RUNNING = 0,
     DONE = 1,
@@ -566,8 +577,10 @@ pub const stream = opaque {
     extern fn pa_stream_set_event_callback(p: *stream, cb: stream_event_cb_t, userdata: ?*anyopaque) void;
     pub const set_buffer_attr_callback = pa_stream_set_buffer_attr_callback;
     extern fn pa_stream_set_buffer_attr_callback(p: *stream, cb: stream_notify_cb_t, userdata: ?*anyopaque) void;
-    pub const cork = pa_stream_cork;
-    extern fn pa_stream_cork(s: *stream, b: c_int, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub fn cork(s: *stream, b: c_int, cb: ?stream_success_cb_t, userdata: ?*anyopaque) error{OutOfMemory}!*operation {
+        return pa_stream_cork(s, b, cb, userdata) orelse return error.OutOfMemory;
+    }
+    extern fn pa_stream_cork(s: *stream, b: c_int, cb: ?stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const flush = pa_stream_flush;
     extern fn pa_stream_flush(s: *stream, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const prebuf = pa_stream_prebuf;
@@ -1062,11 +1075,6 @@ extern fn pa_format_info_set_sample_format(f: [*c]format_info, sf: sample_format
 extern fn pa_format_info_set_rate(f: [*c]format_info, rate: c_int) void;
 extern fn pa_format_info_set_channels(f: [*c]format_info, channels: c_int) void;
 extern fn pa_format_info_set_channel_map(f: [*c]format_info, map: [*c]const channel_map) void;
-extern fn pa_operation_ref(o: ?*operation) ?*operation;
-extern fn pa_operation_unref(o: ?*operation) void;
-extern fn pa_operation_cancel(o: ?*operation) void;
-extern fn pa_operation_get_state(o: ?*const operation) operation_state_t;
-extern fn pa_operation_set_state_callback(o: ?*operation, cb: operation_notify_cb_t, userdata: ?*anyopaque) void;
 extern fn pa_cvolume_equal(a: [*c]const cvolume, b: [*c]const cvolume) c_int;
 extern fn pa_cvolume_init(a: [*c]cvolume) [*c]cvolume;
 extern fn pa_cvolume_set(a: [*c]cvolume, channels: c_uint, v: volume_t) [*c]cvolume;

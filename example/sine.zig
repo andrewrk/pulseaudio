@@ -90,6 +90,18 @@ pub fn main() !void {
         for (fixed_channel_map.map[0..fixed_channel_map.channels], 0..) |channel, i| {
             std.log.info("fixed_channel_map[{d}]={s}", .{ i, @tagName(channel) });
         }
+
+        const op = try stream.cork(0, null, null);
+        op.unref();
+
+        while (true) {
+            main_loop.wait();
+            switch (pulse.stream_state) {
+                .FAILED => return error.StreamFailed,
+                .TERMINATED => return error.StreamTerminated,
+                else => continue,
+            }
+        }
     }
 }
 
@@ -119,7 +131,7 @@ fn streamWriteCallback(stream: *pa.stream, requested_bytes: usize, userdata: ?*a
     std.log.info("requested bytes: {d}", .{requested_bytes});
     var remaining_bytes = requested_bytes;
     while (remaining_bytes > 0) {
-        var ptr_len: usize = std.math.maxInt(usize);
+        var ptr_len: usize = remaining_bytes;
         var opt_ptr: ?[*]i32 = null;
         stream.begin_write(@ptrCast(&opt_ptr), &ptr_len) catch @panic("unhandleable error");
         const ptr = opt_ptr orelse @panic("unhandleable error");
