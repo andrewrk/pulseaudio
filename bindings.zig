@@ -69,29 +69,29 @@ pub const defer_event_cb_t = ?*const fn (*mainloop_api, ?*defer_event, ?*anyopaq
 pub const defer_event_destroy_cb_t = ?*const fn (*mainloop_api, ?*defer_event, ?*anyopaque) callconv(.c) void;
 pub const operation_notify_cb_t = ?*const fn (?*operation, ?*anyopaque) callconv(.c) void;
 pub const context_notify_cb_t = *const fn (*context, ?*anyopaque) callconv(.c) void;
-pub const context_event_cb_t = ?*const fn (?*context, [*c]const u8, ?*proplist, ?*anyopaque) callconv(.c) void;
-pub const context_success_cb_t = ?*const fn (?*context, c_int, ?*anyopaque) callconv(.c) void;
+pub const context_event_cb_t = ?*const fn (*context, [*c]const u8, ?*proplist, ?*anyopaque) callconv(.c) void;
+pub const context_success_cb_t = ?*const fn (*context, c_int, ?*anyopaque) callconv(.c) void;
 pub const free_cb_t = ?*const fn (?*anyopaque) callconv(.c) void;
 pub const stream_success_cb_t = ?*const fn (?*stream, c_int, ?*anyopaque) callconv(.c) void;
 pub const stream_notify_cb_t = ?*const fn (?*stream, ?*anyopaque) callconv(.c) void;
 pub const stream_request_cb_t = ?*const fn (?*stream, usize, ?*anyopaque) callconv(.c) void;
 pub const stream_event_cb_t = ?*const fn (?*stream, [*c]const u8, ?*proplist, ?*anyopaque) callconv(.c) void;
-pub const sink_info_cb_t = ?*const fn (?*context, [*c]const sink_info, c_int, ?*anyopaque) callconv(.c) void;
-pub const source_info_cb_t = ?*const fn (?*context, [*c]const source_info, c_int, ?*anyopaque) callconv(.c) void;
-pub const server_info_cb_t = ?*const fn (?*context, [*c]const server_info, ?*anyopaque) callconv(.c) void;
-pub const module_info_cb_t = ?*const fn (?*context, [*c]const module_info, c_int, ?*anyopaque) callconv(.c) void;
-pub const context_index_cb_t = ?*const fn (?*context, u32, ?*anyopaque) callconv(.c) void;
-pub const context_string_cb_t = ?*const fn (?*context, c_int, [*c]u8, ?*anyopaque) callconv(.c) void;
-pub const client_info_cb_t = ?*const fn (?*context, [*c]const client_info, c_int, ?*anyopaque) callconv(.c) void;
-pub const card_info_cb_t = ?*const fn (?*context, [*c]const card_info, c_int, ?*anyopaque) callconv(.c) void;
-pub const sink_input_info_cb_t = ?*const fn (?*context, [*c]const sink_input_info, c_int, ?*anyopaque) callconv(.c) void;
-pub const source_output_info_cb_t = ?*const fn (?*context, [*c]const source_output_info, c_int, ?*anyopaque) callconv(.c) void;
-pub const stat_info_cb_t = ?*const fn (?*context, [*c]const stat_info, ?*anyopaque) callconv(.c) void;
-pub const sample_info_cb_t = ?*const fn (?*context, [*c]const sample_info, c_int, ?*anyopaque) callconv(.c) void;
-pub const autoload_info_cb_t = ?*const fn (?*context, [*c]const autoload_info, c_int, ?*anyopaque) callconv(.c) void;
+pub const sink_info_cb_t = ?*const fn (*context, [*c]const sink_info, c_int, ?*anyopaque) callconv(.c) void;
+pub const source_info_cb_t = ?*const fn (*context, [*c]const source_info, c_int, ?*anyopaque) callconv(.c) void;
+pub const server_info_cb_t = ?*const fn (*context, [*c]const server_info, ?*anyopaque) callconv(.c) void;
+pub const module_info_cb_t = ?*const fn (*context, [*c]const module_info, c_int, ?*anyopaque) callconv(.c) void;
+pub const context_index_cb_t = ?*const fn (*context, u32, ?*anyopaque) callconv(.c) void;
+pub const context_string_cb_t = ?*const fn (*context, c_int, [*c]u8, ?*anyopaque) callconv(.c) void;
+pub const client_info_cb_t = ?*const fn (*context, [*c]const client_info, c_int, ?*anyopaque) callconv(.c) void;
+pub const card_info_cb_t = ?*const fn (*context, [*c]const card_info, c_int, ?*anyopaque) callconv(.c) void;
+pub const sink_input_info_cb_t = ?*const fn (*context, [*c]const sink_input_info, c_int, ?*anyopaque) callconv(.c) void;
+pub const source_output_info_cb_t = ?*const fn (*context, [*c]const source_output_info, c_int, ?*anyopaque) callconv(.c) void;
+pub const stat_info_cb_t = ?*const fn (*context, [*c]const stat_info, ?*anyopaque) callconv(.c) void;
+pub const sample_info_cb_t = ?*const fn (*context, [*c]const sample_info, c_int, ?*anyopaque) callconv(.c) void;
+pub const autoload_info_cb_t = ?*const fn (*context, [*c]const autoload_info, c_int, ?*anyopaque) callconv(.c) void;
 pub const signal_cb_t = ?*const fn (*mainloop_api, ?*signal_event, c_int, ?*anyopaque) callconv(.c) void;
-pub const context_subscribe_cb_t = ?*const fn (?*context, subscription_event_type_t, u32, ?*anyopaque) callconv(.c) void;
-pub const context_play_sample_cb_t = ?*const fn (?*context, u32, ?*anyopaque) callconv(.c) void;
+pub const context_subscribe_cb_t = ?*const fn (*context, subscription_event_type_t, u32, ?*anyopaque) callconv(.c) void;
+pub const context_play_sample_cb_t = ?*const fn (*context, u32, ?*anyopaque) callconv(.c) void;
 pub const signal_destroy_cb_t = ?*const fn (*mainloop_api, ?*signal_event, ?*anyopaque) callconv(.c) void;
 
 pub const io_event_flags_t = enum(c_uint) {
@@ -164,9 +164,6 @@ pub const channel_map = extern struct {
 pub const channel_position_t = enum(c_int) {
     INVALID = -1,
     MONO = 0,
-    FRONT_LEFT = 1,
-    FRONT_RIGHT = 2,
-    FRONT_CENTER = 3,
     LEFT = 1,
     RIGHT = 2,
     CENTER = 3,
@@ -174,7 +171,6 @@ pub const channel_position_t = enum(c_int) {
     REAR_LEFT = 5,
     REAR_RIGHT = 6,
     LFE = 7,
-    SUBWOOFER = 7,
     FRONT_LEFT_OF_CENTER = 8,
     FRONT_RIGHT_OF_CENTER = 9,
     SIDE_LEFT = 10,
@@ -219,6 +215,11 @@ pub const channel_position_t = enum(c_int) {
     TOP_REAR_RIGHT = 49,
     TOP_REAR_CENTER = 50,
     MAX = 51,
+
+    pub const FRONT_LEFT: channel_position_t = .LEFT;
+    pub const FRONT_RIGHT: channel_position_t = .RIGHT;
+    pub const FRONT_CENTER: channel_position_t = .CENTER;
+    pub const SUBWOOFER: channel_position_t = .LFE;
 };
 
 pub const channel_map_def_t = enum(c_uint) {
@@ -466,8 +467,8 @@ pub const context = opaque {
     };
 
     pub const flags_t = packed struct(c_uint) {
-        NOAUTOSPAWN: u1 = 0,
-        NOFAIL: u1 = 0,
+        NOAUTOSPAWN: bool = false,
+        NOFAIL: bool = false,
         _: u30 = 0,
     };
 };
@@ -482,45 +483,163 @@ pub const cvolume = extern struct {
     values: [32]volume_t,
 };
 pub const volume_t = u32;
-pub const stream = opaque {};
+pub const stream = opaque {
+    pub fn new(c: *context, name: [*:0]const u8, ss: *const sample_spec, map: *const channel_map) error{OutOfMemory}!*stream {
+        return pa_stream_new(c, name, ss, map) orelse return error.OutOfMemory;
+    }
+    extern fn pa_stream_new(c: *context, name: [*:0]const u8, ss: *const sample_spec, map: *const channel_map) ?*stream;
+    pub const new_with_proplist = pa_stream_new_with_proplist;
+    extern fn pa_stream_new_with_proplist(c: *context, name: [*:0]const u8, ss: *const sample_spec, map: *const channel_map, p: ?*proplist) ?*stream;
+    pub const new_extended = pa_stream_new_extended;
+    extern fn pa_stream_new_extended(c: *context, name: [*:0]const u8, formats: [*]const *format_info, n_formats: c_uint, p: ?*proplist) ?*stream;
+    pub const unref = pa_stream_unref;
+    extern fn pa_stream_unref(s: *stream) void;
+    pub const ref = pa_stream_ref;
+    extern fn pa_stream_ref(s: *stream) *stream;
+    pub const get_state = pa_stream_get_state;
+    extern fn pa_stream_get_state(p: *const stream) state_t;
+    pub const get_context = pa_stream_get_context;
+    extern fn pa_stream_get_context(p: *const stream) *context;
+    pub const get_index = pa_stream_get_index;
+    extern fn pa_stream_get_index(s: *const stream) u32;
+    pub const get_device_index = pa_stream_get_device_index;
+    extern fn pa_stream_get_device_index(s: *const stream) u32;
+    pub const get_device_name = pa_stream_get_device_name;
+    extern fn pa_stream_get_device_name(s: *const stream) [*:0]const u8;
+    pub const is_suspended = pa_stream_is_suspended;
+    extern fn pa_stream_is_suspended(s: *const stream) c_int;
+    pub const is_corked = pa_stream_is_corked;
+    extern fn pa_stream_is_corked(s: *const stream) c_int;
+    pub const connect_playback = pa_stream_connect_playback;
+    extern fn pa_stream_connect_playback(s: *stream, dev: [*:0]const u8, attr: [*c]const buffer_attr, flags: flags_t, volume: [*c]const cvolume, sync_stream: *stream) c_int;
+    pub const connect_record = pa_stream_connect_record;
+    extern fn pa_stream_connect_record(s: *stream, dev: [*:0]const u8, attr: [*c]const buffer_attr, flags: flags_t) c_int;
+    pub const disconnect = pa_stream_disconnect;
+    extern fn pa_stream_disconnect(s: *stream) c_int;
+    pub const begin_write = pa_stream_begin_write;
+    extern fn pa_stream_begin_write(p: *stream, data: [*c]?*anyopaque, nbytes: [*c]usize) c_int;
+    pub const cancel_write = pa_stream_cancel_write;
+    extern fn pa_stream_cancel_write(p: *stream) c_int;
+    pub const write = pa_stream_write;
+    extern fn pa_stream_write(p: *stream, data: ?*const anyopaque, nbytes: usize, free_cb: free_cb_t, offset: i64, seek: seek_mode_t) c_int;
+    pub const write_ext_free = pa_stream_write_ext_free;
+    extern fn pa_stream_write_ext_free(p: *stream, data: ?*const anyopaque, nbytes: usize, free_cb: free_cb_t, free_cb_data: ?*anyopaque, offset: i64, seek: seek_mode_t) c_int;
+    pub const peek = pa_stream_peek;
+    extern fn pa_stream_peek(p: *stream, data: [*c]?*const anyopaque, nbytes: [*c]usize) c_int;
+    pub const drop = pa_stream_drop;
+    extern fn pa_stream_drop(p: *stream) c_int;
+    pub const writable_size = pa_stream_writable_size;
+    extern fn pa_stream_writable_size(p: *const stream) usize;
+    pub const readable_size = pa_stream_readable_size;
+    extern fn pa_stream_readable_size(p: *const stream) usize;
+    pub const drain = pa_stream_drain;
+    extern fn pa_stream_drain(s: *stream, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const update_timing_info = pa_stream_update_timing_info;
+    extern fn pa_stream_update_timing_info(p: *stream, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_state_callback = pa_stream_set_state_callback;
+    extern fn pa_stream_set_state_callback(s: *stream, cb: stream_notify_cb_t, userdata: ?*anyopaque) void;
+    pub const set_write_callback = pa_stream_set_write_callback;
+    extern fn pa_stream_set_write_callback(p: *stream, cb: stream_request_cb_t, userdata: ?*anyopaque) void;
+    pub const set_read_callback = pa_stream_set_read_callback;
+    extern fn pa_stream_set_read_callback(p: *stream, cb: stream_request_cb_t, userdata: ?*anyopaque) void;
+    pub const set_overflow_callback = pa_stream_set_overflow_callback;
+    extern fn pa_stream_set_overflow_callback(p: *stream, cb: stream_notify_cb_t, userdata: ?*anyopaque) void;
+    pub const get_underflow_index = pa_stream_get_underflow_index;
+    extern fn pa_stream_get_underflow_index(p: *const stream) i64;
+    pub const set_underflow_callback = pa_stream_set_underflow_callback;
+    extern fn pa_stream_set_underflow_callback(p: *stream, cb: stream_notify_cb_t, userdata: ?*anyopaque) void;
+    pub const set_started_callback = pa_stream_set_started_callback;
+    extern fn pa_stream_set_started_callback(p: *stream, cb: stream_notify_cb_t, userdata: ?*anyopaque) void;
+    pub const set_latency_update_callback = pa_stream_set_latency_update_callback;
+    extern fn pa_stream_set_latency_update_callback(p: *stream, cb: stream_notify_cb_t, userdata: ?*anyopaque) void;
+    pub const set_moved_callback = pa_stream_set_moved_callback;
+    extern fn pa_stream_set_moved_callback(p: *stream, cb: stream_notify_cb_t, userdata: ?*anyopaque) void;
+    pub const set_suspended_callback = pa_stream_set_suspended_callback;
+    extern fn pa_stream_set_suspended_callback(p: *stream, cb: stream_notify_cb_t, userdata: ?*anyopaque) void;
+    pub const set_event_callback = pa_stream_set_event_callback;
+    extern fn pa_stream_set_event_callback(p: *stream, cb: stream_event_cb_t, userdata: ?*anyopaque) void;
+    pub const set_buffer_attr_callback = pa_stream_set_buffer_attr_callback;
+    extern fn pa_stream_set_buffer_attr_callback(p: *stream, cb: stream_notify_cb_t, userdata: ?*anyopaque) void;
+    pub const cork = pa_stream_cork;
+    extern fn pa_stream_cork(s: *stream, b: c_int, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const flush = pa_stream_flush;
+    extern fn pa_stream_flush(s: *stream, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const prebuf = pa_stream_prebuf;
+    extern fn pa_stream_prebuf(s: *stream, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const trigger = pa_stream_trigger;
+    extern fn pa_stream_trigger(s: *stream, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_name = pa_stream_set_name;
+    extern fn pa_stream_set_name(s: *stream, name: [*:0]const u8, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_time = pa_stream_get_time;
+    extern fn pa_stream_get_time(s: *stream, r_usec: [*c]usec_t) c_int;
+    pub const get_latency = pa_stream_get_latency;
+    extern fn pa_stream_get_latency(s: *stream, r_usec: [*c]usec_t, negative: [*c]c_int) c_int;
+    pub const get_timing_info = pa_stream_get_timing_info;
+    extern fn pa_stream_get_timing_info(s: *stream) *const timing_info;
+    pub const get_sample_spec = pa_stream_get_sample_spec;
+    extern fn pa_stream_get_sample_spec(s: *stream) *const sample_spec;
+    pub const get_channel_map = pa_stream_get_channel_map;
+    extern fn pa_stream_get_channel_map(s: *stream) *const channel_map;
+    pub const get_format_info = pa_stream_get_format_info;
+    extern fn pa_stream_get_format_info(s: *const stream) *const format_info;
+    pub const get_buffer_attr = pa_stream_get_buffer_attr;
+    extern fn pa_stream_get_buffer_attr(s: *stream) [*c]const buffer_attr;
+    pub const set_buffer_attr = pa_stream_set_buffer_attr;
+    extern fn pa_stream_set_buffer_attr(s: *stream, attr: [*c]const buffer_attr, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const update_sample_rate = pa_stream_update_sample_rate;
+    extern fn pa_stream_update_sample_rate(s: *stream, rate: u32, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const proplist_update = pa_stream_proplist_update;
+    extern fn pa_stream_proplist_update(s: *stream, mode: update_mode_t, p: ?*proplist, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const proplist_remove = pa_stream_proplist_remove;
+    extern fn pa_stream_proplist_remove(s: *stream, keys: [*c]const [*:0]const u8, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_monitor_stream = pa_stream_set_monitor_stream;
+    extern fn pa_stream_set_monitor_stream(s: *stream, sink_input_idx: u32) c_int;
+    pub const get_monitor_stream = pa_stream_get_monitor_stream;
+    extern fn pa_stream_get_monitor_stream(s: *const stream) u32;
+    pub const connect_upload = pa_stream_connect_upload;
+    extern fn pa_stream_connect_upload(s: *stream, length: usize) c_int;
+    pub const finish_upload = pa_stream_finish_upload;
+    extern fn pa_stream_finish_upload(s: *stream) c_int;
 
-pub const stream_state_t = enum(c_uint) {
-    UNCONNECTED = 0,
-    CREATING = 1,
-    READY = 2,
-    FAILED = 3,
-    TERMINATED = 4,
+    pub const state_t = enum(c_uint) {
+        UNCONNECTED = 0,
+        CREATING = 1,
+        READY = 2,
+        FAILED = 3,
+        TERMINATED = 4,
+    };
+
+    pub const flags_t = packed struct(u32) {
+        START_CORKED: bool = false,
+        INTERPOLATE_TIMING: bool = false,
+        NOT_MONOTONIC: bool = false,
+        AUTO_TIMING_UPDATE: bool = false,
+        NO_REMAP_CHANNELS: bool = false,
+        NO_REMIX_CHANNELS: bool = false,
+        FIX_FORMAT: bool = false,
+        FIX_RATE: bool = false,
+        FIX_CHANNELS: bool = false,
+        DONT_MOVE: bool = false,
+        VARIABLE_RATE: bool = false,
+        PEAK_DETECT: bool = false,
+        START_MUTED: bool = false,
+        ADJUST_LATENCY: bool = false,
+        EARLY_REQUESTS: bool = false,
+        DONT_INHIBIT_AUTO_SUSPEND: bool = false,
+        START_UNMUTED: bool = false,
+        FAIL_ON_SUSPEND: bool = false,
+        RELATIVE_VOLUME: bool = false,
+        PASSTHROUGH: bool = false,
+        _: u10 = 0,
+    };
 };
+
 pub const buffer_attr = extern struct {
     maxlength: u32,
     tlength: u32,
     prebuf: u32,
     minreq: u32,
     fragsize: u32,
-};
-
-pub const stream_flags_t = enum(c_uint) {
-    NOFLAGS = 0,
-    START_CORKED = 1,
-    INTERPOLATE_TIMING = 2,
-    NOT_MONOTONIC = 4,
-    AUTO_TIMING_UPDATE = 8,
-    NO_REMAP_CHANNELS = 16,
-    NO_REMIX_CHANNELS = 32,
-    FIX_FORMAT = 64,
-    FIX_RATE = 128,
-    FIX_CHANNELS = 256,
-    DONT_MOVE = 512,
-    VARIABLE_RATE = 1024,
-    PEAK_DETECT = 2048,
-    START_MUTED = 4096,
-    ADJUST_LATENCY = 8192,
-    EARLY_REQUESTS = 16384,
-    DONT_INHIBIT_AUTO_SUSPEND = 32768,
-    START_UNMUTED = 65536,
-    FAIL_ON_SUSPEND = 131072,
-    RELATIVE_VOLUME = 262144,
-    PASSTHROUGH = 524288,
 };
 
 pub const seek_mode_t = enum(c_uint) {
@@ -986,63 +1105,6 @@ extern fn pa_cvolume_merge(dest: [*c]cvolume, a: [*c]const cvolume, b: [*c]const
 extern fn pa_cvolume_inc_clamp(v: [*c]cvolume, inc: volume_t, limit: volume_t) [*c]cvolume;
 extern fn pa_cvolume_inc(v: [*c]cvolume, inc: volume_t) [*c]cvolume;
 extern fn pa_cvolume_dec(v: [*c]cvolume, dec: volume_t) [*c]cvolume;
-extern fn pa_stream_new(c: ?*context, name: [*c]const u8, ss: [*c]const sample_spec, map: [*c]const channel_map) ?*stream;
-extern fn pa_stream_new_with_proplist(c: ?*context, name: [*c]const u8, ss: [*c]const sample_spec, map: [*c]const channel_map, p: ?*proplist) ?*stream;
-extern fn pa_stream_new_extended(c: ?*context, name: [*c]const u8, formats: [*c]const [*c]format_info, n_formats: c_uint, p: ?*proplist) ?*stream;
-extern fn pa_stream_unref(s: ?*stream) void;
-extern fn pa_stream_ref(s: ?*stream) ?*stream;
-extern fn pa_stream_get_state(p: ?*const stream) stream_state_t;
-extern fn pa_stream_get_context(p: ?*const stream) ?*context;
-extern fn pa_stream_get_index(s: ?*const stream) u32;
-extern fn pa_stream_get_device_index(s: ?*const stream) u32;
-extern fn pa_stream_get_device_name(s: ?*const stream) [*c]const u8;
-extern fn pa_stream_is_suspended(s: ?*const stream) c_int;
-extern fn pa_stream_is_corked(s: ?*const stream) c_int;
-extern fn pa_stream_connect_playback(s: ?*stream, dev: [*c]const u8, attr: [*c]const buffer_attr, flags: stream_flags_t, volume: [*c]const cvolume, sync_stream: ?*stream) c_int;
-extern fn pa_stream_connect_record(s: ?*stream, dev: [*c]const u8, attr: [*c]const buffer_attr, flags: stream_flags_t) c_int;
-extern fn pa_stream_disconnect(s: ?*stream) c_int;
-extern fn pa_stream_begin_write(p: ?*stream, data: [*c]?*anyopaque, nbytes: [*c]usize) c_int;
-extern fn pa_stream_cancel_write(p: ?*stream) c_int;
-extern fn pa_stream_write(p: ?*stream, data: ?*const anyopaque, nbytes: usize, free_cb: free_cb_t, offset: i64, seek: seek_mode_t) c_int;
-extern fn pa_stream_write_ext_free(p: ?*stream, data: ?*const anyopaque, nbytes: usize, free_cb: free_cb_t, free_cb_data: ?*anyopaque, offset: i64, seek: seek_mode_t) c_int;
-extern fn pa_stream_peek(p: ?*stream, data: [*c]?*const anyopaque, nbytes: [*c]usize) c_int;
-extern fn pa_stream_drop(p: ?*stream) c_int;
-extern fn pa_stream_writable_size(p: ?*const stream) usize;
-extern fn pa_stream_readable_size(p: ?*const stream) usize;
-extern fn pa_stream_drain(s: ?*stream, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_stream_update_timing_info(p: ?*stream, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_stream_set_state_callback(s: ?*stream, cb: stream_notify_cb_t, userdata: ?*anyopaque) void;
-extern fn pa_stream_set_write_callback(p: ?*stream, cb: stream_request_cb_t, userdata: ?*anyopaque) void;
-extern fn pa_stream_set_read_callback(p: ?*stream, cb: stream_request_cb_t, userdata: ?*anyopaque) void;
-extern fn pa_stream_set_overflow_callback(p: ?*stream, cb: stream_notify_cb_t, userdata: ?*anyopaque) void;
-extern fn pa_stream_get_underflow_index(p: ?*const stream) i64;
-extern fn pa_stream_set_underflow_callback(p: ?*stream, cb: stream_notify_cb_t, userdata: ?*anyopaque) void;
-extern fn pa_stream_set_started_callback(p: ?*stream, cb: stream_notify_cb_t, userdata: ?*anyopaque) void;
-extern fn pa_stream_set_latency_update_callback(p: ?*stream, cb: stream_notify_cb_t, userdata: ?*anyopaque) void;
-extern fn pa_stream_set_moved_callback(p: ?*stream, cb: stream_notify_cb_t, userdata: ?*anyopaque) void;
-extern fn pa_stream_set_suspended_callback(p: ?*stream, cb: stream_notify_cb_t, userdata: ?*anyopaque) void;
-extern fn pa_stream_set_event_callback(p: ?*stream, cb: stream_event_cb_t, userdata: ?*anyopaque) void;
-extern fn pa_stream_set_buffer_attr_callback(p: ?*stream, cb: stream_notify_cb_t, userdata: ?*anyopaque) void;
-extern fn pa_stream_cork(s: ?*stream, b: c_int, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_stream_flush(s: ?*stream, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_stream_prebuf(s: ?*stream, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_stream_trigger(s: ?*stream, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_stream_set_name(s: ?*stream, name: [*c]const u8, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_stream_get_time(s: ?*stream, r_usec: [*c]usec_t) c_int;
-extern fn pa_stream_get_latency(s: ?*stream, r_usec: [*c]usec_t, negative: [*c]c_int) c_int;
-extern fn pa_stream_get_timing_info(s: ?*stream) [*c]const timing_info;
-extern fn pa_stream_get_sample_spec(s: ?*stream) [*c]const sample_spec;
-extern fn pa_stream_get_channel_map(s: ?*stream) [*c]const channel_map;
-extern fn pa_stream_get_format_info(s: ?*const stream) [*c]const format_info;
-extern fn pa_stream_get_buffer_attr(s: ?*stream) [*c]const buffer_attr;
-extern fn pa_stream_set_buffer_attr(s: ?*stream, attr: [*c]const buffer_attr, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_stream_update_sample_rate(s: ?*stream, rate: u32, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_stream_proplist_update(s: ?*stream, mode: update_mode_t, p: ?*proplist, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_stream_proplist_remove(s: ?*stream, keys: [*c]const [*c]const u8, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_stream_set_monitor_stream(s: ?*stream, sink_input_idx: u32) c_int;
-extern fn pa_stream_get_monitor_stream(s: ?*const stream) u32;
-extern fn pa_stream_connect_upload(s: ?*stream, length: usize) c_int;
-extern fn pa_stream_finish_upload(s: ?*stream) c_int;
 extern fn pa_strerror(@"error": c_int) [*:0]const u8;
 extern fn pa_xmalloc(l: usize) ?*anyopaque;
 extern fn pa_xmalloc0(l: usize) ?*anyopaque;

@@ -28,22 +28,39 @@ pub fn main() !void {
     try main_loop.start();
     defer main_loop.stop();
 
-    main_loop.lock();
-    defer main_loop.unlock();
+    {
+        // Block until ready.
+        main_loop.lock();
+        defer main_loop.unlock();
 
-    // Block until ready.
-    while (true) {
-        main_loop.wait();
-        switch (pulse.state) {
-            .READY => break,
-            .FAILED => return error.Failed,
-            .TERMINATED => return error.Terminated,
-            else => continue,
+        while (true) {
+            main_loop.wait();
+            switch (pulse.state) {
+                .READY => break,
+                .FAILED => return error.Failed,
+                .TERMINATED => return error.Terminated,
+                else => continue,
+            }
         }
     }
 
-    //ospa->stream = pa_stream_new(sipa->pulse_context, outstream->name, &sample_spec, &channel_map);
+    {
+        // Open output stream.
+        main_loop.lock();
+        defer main_loop.unlock();
 
+        const sample_spec: pa.sample_spec = .{
+            .format = .FLOAT32LE,
+            .rate = 48000,
+            .channels = 2,
+        };
+        const channel_map: pa.channel_map = .{
+            .channels = 2,
+            .map = .{ .LEFT, .RIGHT } ++ .{.INVALID} ** 30,
+        };
+        const stream = try pa.stream.new(context, "main stream", &sample_spec, &channel_map);
+        _ = stream;
+    }
 }
 
 fn stateCallback(context: *pa.context, my_context_opaque: ?*anyopaque) callconv(.c) void {
