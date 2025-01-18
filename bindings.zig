@@ -68,7 +68,7 @@ pub const time_event_destroy_cb_t = ?*const fn (*mainloop_api, ?*time_event, ?*a
 pub const defer_event_cb_t = ?*const fn (*mainloop_api, ?*defer_event, ?*anyopaque) callconv(.c) void;
 pub const defer_event_destroy_cb_t = ?*const fn (*mainloop_api, ?*defer_event, ?*anyopaque) callconv(.c) void;
 pub const operation_notify_cb_t = ?*const fn (?*operation, ?*anyopaque) callconv(.c) void;
-pub const context_notify_cb_t = ?*const fn (?*context, ?*anyopaque) callconv(.c) void;
+pub const context_notify_cb_t = *const fn (*context, ?*anyopaque) callconv(.c) void;
 pub const context_event_cb_t = ?*const fn (?*context, [*c]const u8, ?*proplist, ?*anyopaque) callconv(.c) void;
 pub const context_success_cb_t = ?*const fn (?*context, c_int, ?*anyopaque) callconv(.c) void;
 pub const free_cb_t = ?*const fn (?*anyopaque) callconv(.c) void;
@@ -775,7 +775,9 @@ pub const threaded_mainloop = opaque {
     extern fn pa_threaded_mainloop_new() ?*threaded_mainloop;
     pub const free = pa_threaded_mainloop_free;
     extern fn pa_threaded_mainloop_free(m: *threaded_mainloop) void;
-    pub const start = pa_threaded_mainloop_start;
+    pub fn start(m: *threaded_mainloop) Error!void {
+        return unwrapError(pa_threaded_mainloop_start(m));
+    }
     extern fn pa_threaded_mainloop_start(m: *threaded_mainloop) c_int;
     pub const stop = pa_threaded_mainloop_stop;
     extern fn pa_threaded_mainloop_stop(m: *threaded_mainloop) void;
