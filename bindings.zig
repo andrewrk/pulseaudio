@@ -1,6 +1,23 @@
 const std = @import("std");
+const log = std.log.scoped(.pulseaudio);
+
+pub const Error = error{
+    Unexpected,
+};
+
+pub fn unwrapError(err: c_int) Error!void {
+    switch (err) {
+        0 => return,
+        else => {
+            log.warn("undocumented pulseaudio error {d}: {s}", .{ err, strerror(err) });
+            return error.Unexpected;
+        },
+    }
+}
 
 pub const get_library_version = pa_get_library_version;
+pub const strerror = pa_strerror;
+
 pub const sample_spec = extern struct {
     format: sample_format_t,
     rate: u32,
@@ -88,7 +105,9 @@ pub const io_event = opaque {};
 pub const time_event = opaque {};
 pub const defer_event = opaque {};
 pub const proplist = opaque {
-    pub const new = pa_proplist_new;
+    pub fn new() error{OutOfMemory}!*proplist {
+        return pa_proplist_new() orelse return error.OutOfMemory;
+    }
     extern fn pa_proplist_new() ?*proplist;
     pub const free = pa_proplist_free;
     extern fn pa_proplist_free(p: ?*proplist) void;
@@ -247,7 +266,9 @@ pub const operation_state_t = enum(c_uint) {
 pub const context = opaque {
     pub const new = pa_context_new;
     extern fn pa_context_new(mainloop: *mainloop_api, name: [*:0]const u8) ?*context;
-    pub const new_with_proplist = pa_context_new_with_proplist;
+    pub fn new_with_proplist(mla: *mainloop_api, name: [*:0]const u8, pl: ?*const proplist) error{OutOfMemory}!*context {
+        return pa_context_new_with_proplist(mla, name, pl) orelse return error.OutOfMemory;
+    }
     extern fn pa_context_new_with_proplist(mainloop: *mainloop_api, name: [*:0]const u8, proplist: ?*const proplist) ?*context;
     pub const unref = pa_context_unref;
     extern fn pa_context_unref(c: *context) void;
@@ -262,9 +283,11 @@ pub const context = opaque {
     pub const is_pending = pa_context_is_pending;
     extern fn pa_context_is_pending(c: ?*const context) c_int;
     pub const get_state = pa_context_get_state;
-    extern fn pa_context_get_state(c: ?*const context) context_state_t;
-    pub const connect = pa_context_connect;
-    extern fn pa_context_connect(c: *context, server: [*:0]const u8, flags: context_flags_t, api: [*c]const spawn_api) c_int;
+    extern fn pa_context_get_state(c: ?*const context) state_t;
+    pub fn connect(c: *context, server: ?[*:0]const u8, flags: flags_t, api: ?*const spawn_api) Error!void {
+        return unwrapError(pa_context_connect(c, server, flags, api));
+    }
+    extern fn pa_context_connect(c: *context, server: ?[*:0]const u8, flags: flags_t, api: ?*const spawn_api) c_int;
     pub const disconnect = pa_context_disconnect;
     extern fn pa_context_disconnect(c: *context) void;
     pub const drain = pa_context_drain;
@@ -431,22 +454,22 @@ pub const context = opaque {
     extern fn pa_context_play_sample(c: *context, name: [*:0]const u8, dev: [*:0]const u8, volume: volume_t, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const play_sample_with_proplist = pa_context_play_sample_with_proplist;
     extern fn pa_context_play_sample_with_proplist(c: *context, name: [*:0]const u8, dev: [*:0]const u8, volume: volume_t, proplist: ?*const proplist, cb: context_play_sample_cb_t, userdata: ?*anyopaque) ?*operation;
-};
 
-pub const context_state_t = enum(c_uint) {
-    UNCONNECTED = 0,
-    CONNECTING = 1,
-    AUTHORIZING = 2,
-    SETTING_NAME = 3,
-    READY = 4,
-    FAILED = 5,
-    TERMINATED = 6,
-};
+    pub const state_t = enum(c_uint) {
+        UNCONNECTED = 0,
+        CONNECTING = 1,
+        AUTHORIZING = 2,
+        SETTING_NAME = 3,
+        READY = 4,
+        FAILED = 5,
+        TERMINATED = 6,
+    };
 
-pub const context_flags_t = enum(c_uint) {
-    NOFLAGS = 0,
-    NOAUTOSPAWN = 1,
-    NOFAIL = 2,
+    pub const flags_t = packed struct(c_uint) {
+        NOAUTOSPAWN: u1 = 0,
+        NOFAIL: u1 = 0,
+        _: u30 = 0,
+    };
 };
 
 pub const spawn_api = extern struct {
@@ -746,7 +769,9 @@ pub const card_profile_info = extern struct {
     priority: u32,
 };
 pub const threaded_mainloop = opaque {
-    pub const new = pa_threaded_mainloop_new;
+    pub fn new() error{OutOfMemory}!*threaded_mainloop {
+        return pa_threaded_mainloop_new() orelse return error.OutOfMemory;
+    }
     extern fn pa_threaded_mainloop_new() ?*threaded_mainloop;
     pub const free = pa_threaded_mainloop_free;
     extern fn pa_threaded_mainloop_free(m: *threaded_mainloop) void;
@@ -1016,7 +1041,7 @@ extern fn pa_stream_set_monitor_stream(s: ?*stream, sink_input_idx: u32) c_int;
 extern fn pa_stream_get_monitor_stream(s: ?*const stream) u32;
 extern fn pa_stream_connect_upload(s: ?*stream, length: usize) c_int;
 extern fn pa_stream_finish_upload(s: ?*stream) c_int;
-extern fn pa_strerror(@"error": c_int) [*c]const u8;
+extern fn pa_strerror(@"error": c_int) [*:0]const u8;
 extern fn pa_xmalloc(l: usize) ?*anyopaque;
 extern fn pa_xmalloc0(l: usize) ?*anyopaque;
 extern fn pa_xrealloc(ptr: ?*anyopaque, size: usize) ?*anyopaque;
