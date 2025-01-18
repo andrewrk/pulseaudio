@@ -110,27 +110,29 @@ pub const proplist = opaque {
     }
     extern fn pa_proplist_new() ?*proplist;
     pub const free = pa_proplist_free;
-    extern fn pa_proplist_free(p: ?*proplist) void;
+    extern fn pa_proplist_free(p: *proplist) void;
     pub const key_valid = pa_proplist_key_valid;
     extern fn pa_proplist_key_valid(key: [*:0]const u8) c_int;
-    pub const sets = pa_proplist_sets;
-    extern fn pa_proplist_sets(p: ?*proplist, key: [*:0]const u8, value: [*:0]const u8) c_int;
+    pub fn sets(p: *proplist, key: [*:0]const u8, value: [*:0]const u8) Error!void {
+        return unwrapError(pa_proplist_sets(p, key, value));
+    }
+    extern fn pa_proplist_sets(p: *proplist, key: [*:0]const u8, value: [*:0]const u8) c_int;
     pub const setp = pa_proplist_setp;
-    extern fn pa_proplist_setp(p: ?*proplist, pair: [*:0]const u8) c_int;
+    extern fn pa_proplist_setp(p: *proplist, pair: [*:0]const u8) c_int;
     pub const setf = pa_proplist_setf;
-    extern fn pa_proplist_setf(p: ?*proplist, key: [*:0]const u8, format: [*:0]const u8, ...) c_int;
+    extern fn pa_proplist_setf(p: *proplist, key: [*:0]const u8, format: [*:0]const u8, ...) c_int;
     pub const set = pa_proplist_set;
-    extern fn pa_proplist_set(p: ?*proplist, key: [*:0]const u8, data: ?*const anyopaque, nbytes: usize) c_int;
+    extern fn pa_proplist_set(p: *proplist, key: [*:0]const u8, data: ?*const anyopaque, nbytes: usize) c_int;
     pub const gets = pa_proplist_gets;
     extern fn pa_proplist_gets(p: ?*const proplist, key: [*:0]const u8) [*:0]const u8;
     pub const get = pa_proplist_get;
     extern fn pa_proplist_get(p: ?*const proplist, key: [*:0]const u8, data: [*c]?*const anyopaque, nbytes: [*c]usize) c_int;
     pub const update = pa_proplist_update;
-    extern fn pa_proplist_update(p: ?*proplist, mode: update_mode_t, other: ?*const proplist) void;
+    extern fn pa_proplist_update(p: *proplist, mode: update_mode_t, other: ?*const proplist) void;
     pub const unset = pa_proplist_unset;
-    extern fn pa_proplist_unset(p: ?*proplist, key: [*:0]const u8) c_int;
+    extern fn pa_proplist_unset(p: *proplist, key: [*:0]const u8) c_int;
     pub const unset_many = pa_proplist_unset_many;
-    extern fn pa_proplist_unset_many(p: ?*proplist, keys: [*:null]const ?[*:0]const u8) c_int;
+    extern fn pa_proplist_unset_many(p: *proplist, keys: [*:null]const ?[*:0]const u8) c_int;
     pub const iterate = pa_proplist_iterate;
     extern fn pa_proplist_iterate(p: ?*const proplist, state: [*c]?*anyopaque) [*:0]const u8;
     pub const to_string = pa_proplist_to_string;
@@ -142,7 +144,7 @@ pub const proplist = opaque {
     pub const contains = pa_proplist_contains;
     extern fn pa_proplist_contains(p: ?*const proplist, key: [*:0]const u8) c_int;
     pub const clear = pa_proplist_clear;
-    extern fn pa_proplist_clear(p: ?*proplist) void;
+    extern fn pa_proplist_clear(p: *proplist) void;
     pub const copy = pa_proplist_copy;
     extern fn pa_proplist_copy(p: ?*const proplist) ?*proplist;
     pub const size = pa_proplist_size;
@@ -499,7 +501,9 @@ pub const stream = opaque {
         return pa_stream_new(c, name, ss, map) orelse return error.OutOfMemory;
     }
     extern fn pa_stream_new(c: *context, name: [*:0]const u8, ss: *const sample_spec, map: *const channel_map) ?*stream;
-    pub const new_with_proplist = pa_stream_new_with_proplist;
+    pub fn new_with_proplist(c: *context, name: [*:0]const u8, ss: *const sample_spec, map: *const channel_map, p: ?*proplist) error{OutOfMemory}!*stream {
+        return pa_stream_new_with_proplist(c, name, ss, map, p) orelse return error.OutOfMemory;
+    }
     extern fn pa_stream_new_with_proplist(c: *context, name: [*:0]const u8, ss: *const sample_spec, map: *const channel_map, p: ?*proplist) ?*stream;
     pub const new_extended = pa_stream_new_extended;
     extern fn pa_stream_new_extended(c: *context, name: [*:0]const u8, formats: [*]const *format_info, n_formats: c_uint, p: ?*proplist) ?*stream;

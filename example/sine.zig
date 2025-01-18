@@ -14,6 +14,11 @@ pub fn main() !void {
     const props = try pa.proplist.new();
     defer props.free();
 
+    try props.sets("media.role", "music");
+    try props.sets("media.software", "my cool app");
+    try props.sets("media.title", "song title");
+    try props.sets("media.artist", "song artist");
+
     const context = try pa.context.new_with_proplist(main_loop.get_api(), "sine example", props);
     defer context.unref();
 
@@ -60,7 +65,7 @@ pub fn main() !void {
             .channels = 2,
             .map = .{ .LEFT, .RIGHT } ++ .{.INVALID} ** 30,
         };
-        const stream = try pa.stream.new(context, "main stream", &sample_spec, &channel_map);
+        const stream = try pa.stream.new_with_proplist(context, "main stream", &sample_spec, &channel_map, props);
 
         stream.set_state_callback(streamStateCallback, &pulse);
         stream.set_write_callback(streamWriteCallback, &pulse);
