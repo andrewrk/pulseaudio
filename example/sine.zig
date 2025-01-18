@@ -7,6 +7,6 @@ pub fn main() !void {
     const props = pa.proplist.new() orelse return error.OutOfMemory;
     defer props.free();
 
-    //const context = pa.context.new_with_proplist(main_loop.get_api(), "sine example", props);
-    //defer context.unref();
+    const context = pa.context.new_with_proplist(main_loop.get_api(), "sine example", props) orelse return error.OutOfMemory;
+    defer context.unref();
 }

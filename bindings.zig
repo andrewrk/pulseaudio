@@ -30,26 +30,26 @@ pub const direction_t = enum(c_uint) {
 };
 pub const mainloop_api = extern struct {
     userdata: ?*anyopaque,
-    io_new: ?*const fn ([*c]mainloop_api, c_int, io_event_flags_t, io_event_cb_t, ?*anyopaque) callconv(.c) ?*io_event,
+    io_new: ?*const fn (*mainloop_api, c_int, io_event_flags_t, io_event_cb_t, ?*anyopaque) callconv(.c) ?*io_event,
     io_enable: ?*const fn (?*io_event, io_event_flags_t) callconv(.c) void,
     io_free: ?*const fn (?*io_event) callconv(.c) void,
     io_set_destroy: ?*const fn (?*io_event, io_event_destroy_cb_t) callconv(.c) void,
-    time_new: ?*const fn ([*c]mainloop_api, [*c]const std.c.timeval, time_event_cb_t, ?*anyopaque) callconv(.c) ?*time_event,
+    time_new: ?*const fn (*mainloop_api, [*c]const std.c.timeval, time_event_cb_t, ?*anyopaque) callconv(.c) ?*time_event,
     time_restart: ?*const fn (?*time_event, [*c]const std.c.timeval) callconv(.c) void,
     time_free: ?*const fn (?*time_event) callconv(.c) void,
     time_set_destroy: ?*const fn (?*time_event, time_event_destroy_cb_t) callconv(.c) void,
-    defer_new: ?*const fn ([*c]mainloop_api, defer_event_cb_t, ?*anyopaque) callconv(.c) ?*defer_event,
+    defer_new: ?*const fn (*mainloop_api, defer_event_cb_t, ?*anyopaque) callconv(.c) ?*defer_event,
     defer_enable: ?*const fn (?*defer_event, c_int) callconv(.c) void,
     defer_free: ?*const fn (?*defer_event) callconv(.c) void,
     defer_set_destroy: ?*const fn (?*defer_event, defer_event_destroy_cb_t) callconv(.c) void,
-    quit: ?*const fn ([*c]mainloop_api, c_int) callconv(.c) void,
+    quit: ?*const fn (*mainloop_api, c_int) callconv(.c) void,
 };
-pub const io_event_cb_t = ?*const fn ([*c]mainloop_api, ?*io_event, c_int, io_event_flags_t, ?*anyopaque) callconv(.c) void;
-pub const time_event_cb_t = ?*const fn ([*c]mainloop_api, ?*time_event, [*c]const std.c.timeval, ?*anyopaque) callconv(.c) void;
-pub const io_event_destroy_cb_t = ?*const fn ([*c]mainloop_api, ?*io_event, ?*anyopaque) callconv(.c) void;
-pub const time_event_destroy_cb_t = ?*const fn ([*c]mainloop_api, ?*time_event, ?*anyopaque) callconv(.c) void;
-pub const defer_event_cb_t = ?*const fn ([*c]mainloop_api, ?*defer_event, ?*anyopaque) callconv(.c) void;
-pub const defer_event_destroy_cb_t = ?*const fn ([*c]mainloop_api, ?*defer_event, ?*anyopaque) callconv(.c) void;
+pub const io_event_cb_t = ?*const fn (*mainloop_api, ?*io_event, c_int, io_event_flags_t, ?*anyopaque) callconv(.c) void;
+pub const time_event_cb_t = ?*const fn (*mainloop_api, ?*time_event, [*c]const std.c.timeval, ?*anyopaque) callconv(.c) void;
+pub const io_event_destroy_cb_t = ?*const fn (*mainloop_api, ?*io_event, ?*anyopaque) callconv(.c) void;
+pub const time_event_destroy_cb_t = ?*const fn (*mainloop_api, ?*time_event, ?*anyopaque) callconv(.c) void;
+pub const defer_event_cb_t = ?*const fn (*mainloop_api, ?*defer_event, ?*anyopaque) callconv(.c) void;
+pub const defer_event_destroy_cb_t = ?*const fn (*mainloop_api, ?*defer_event, ?*anyopaque) callconv(.c) void;
 pub const operation_notify_cb_t = ?*const fn (?*operation, ?*anyopaque) callconv(.c) void;
 pub const context_notify_cb_t = ?*const fn (?*context, ?*anyopaque) callconv(.c) void;
 pub const context_event_cb_t = ?*const fn (?*context, [*c]const u8, ?*proplist, ?*anyopaque) callconv(.c) void;
@@ -72,10 +72,10 @@ pub const source_output_info_cb_t = ?*const fn (?*context, [*c]const source_outp
 pub const stat_info_cb_t = ?*const fn (?*context, [*c]const stat_info, ?*anyopaque) callconv(.c) void;
 pub const sample_info_cb_t = ?*const fn (?*context, [*c]const sample_info, c_int, ?*anyopaque) callconv(.c) void;
 pub const autoload_info_cb_t = ?*const fn (?*context, [*c]const autoload_info, c_int, ?*anyopaque) callconv(.c) void;
-pub const signal_cb_t = ?*const fn ([*c]mainloop_api, ?*signal_event, c_int, ?*anyopaque) callconv(.c) void;
+pub const signal_cb_t = ?*const fn (*mainloop_api, ?*signal_event, c_int, ?*anyopaque) callconv(.c) void;
 pub const context_subscribe_cb_t = ?*const fn (?*context, subscription_event_type_t, u32, ?*anyopaque) callconv(.c) void;
 pub const context_play_sample_cb_t = ?*const fn (?*context, u32, ?*anyopaque) callconv(.c) void;
-pub const signal_destroy_cb_t = ?*const fn ([*c]mainloop_api, ?*signal_event, ?*anyopaque) callconv(.c) void;
+pub const signal_destroy_cb_t = ?*const fn (*mainloop_api, ?*signal_event, ?*anyopaque) callconv(.c) void;
 
 pub const io_event_flags_t = enum(c_uint) {
     NULL = 0,
@@ -113,7 +113,7 @@ pub const proplist = opaque {
     pub const unset_many = pa_proplist_unset_many;
     extern fn pa_proplist_unset_many(p: ?*proplist, keys: [*:null]const ?[*:0]const u8) c_int;
     pub const iterate = pa_proplist_iterate;
-    extern fn pa_proplist_iterate(p: ?*const proplist, state: [*c]?*anyopaque) [*c]const u8;
+    extern fn pa_proplist_iterate(p: ?*const proplist, state: [*c]?*anyopaque) [*:0]const u8;
     pub const to_string = pa_proplist_to_string;
     extern fn pa_proplist_to_string(p: ?*const proplist) [*:0]u8;
     pub const to_string_sep = pa_proplist_to_string_sep;
@@ -244,7 +244,194 @@ pub const operation_state_t = enum(c_uint) {
     DONE = 1,
     CANCELLED = 2,
 };
-pub const context = opaque {};
+pub const context = opaque {
+    pub const new = pa_context_new;
+    extern fn pa_context_new(mainloop: *mainloop_api, name: [*:0]const u8) ?*context;
+    pub const new_with_proplist = pa_context_new_with_proplist;
+    extern fn pa_context_new_with_proplist(mainloop: *mainloop_api, name: [*:0]const u8, proplist: ?*const proplist) ?*context;
+    pub const unref = pa_context_unref;
+    extern fn pa_context_unref(c: *context) void;
+    pub const ref = pa_context_ref;
+    extern fn pa_context_ref(c: *context) *context;
+    pub const set_state_callback = pa_context_set_state_callback;
+    extern fn pa_context_set_state_callback(c: *context, cb: context_notify_cb_t, userdata: ?*anyopaque) void;
+    pub const set_event_callback = pa_context_set_event_callback;
+    extern fn pa_context_set_event_callback(p: *context, cb: context_event_cb_t, userdata: ?*anyopaque) void;
+    pub const errno = pa_context_errno;
+    extern fn pa_context_errno(c: ?*const context) c_int;
+    pub const is_pending = pa_context_is_pending;
+    extern fn pa_context_is_pending(c: ?*const context) c_int;
+    pub const get_state = pa_context_get_state;
+    extern fn pa_context_get_state(c: ?*const context) context_state_t;
+    pub const connect = pa_context_connect;
+    extern fn pa_context_connect(c: *context, server: [*:0]const u8, flags: context_flags_t, api: [*c]const spawn_api) c_int;
+    pub const disconnect = pa_context_disconnect;
+    extern fn pa_context_disconnect(c: *context) void;
+    pub const drain = pa_context_drain;
+    extern fn pa_context_drain(c: *context, cb: context_notify_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const exit_daemon = pa_context_exit_daemon;
+    extern fn pa_context_exit_daemon(c: *context, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_default_sink = pa_context_set_default_sink;
+    extern fn pa_context_set_default_sink(c: *context, name: [*:0]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_default_source = pa_context_set_default_source;
+    extern fn pa_context_set_default_source(c: *context, name: [*:0]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const is_local = pa_context_is_local;
+    extern fn pa_context_is_local(c: ?*const context) c_int;
+    pub const set_name = pa_context_set_name;
+    extern fn pa_context_set_name(c: *context, name: [*:0]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_server = pa_context_get_server;
+    extern fn pa_context_get_server(c: ?*const context) [*:0]const u8;
+    pub const get_protocol_version = pa_context_get_protocol_version;
+    extern fn pa_context_get_protocol_version(c: ?*const context) u32;
+    pub const get_server_protocol_version = pa_context_get_server_protocol_version;
+    extern fn pa_context_get_server_protocol_version(c: ?*const context) u32;
+    pub const proplist_update = pa_context_proplist_update;
+    extern fn pa_context_proplist_update(c: *context, mode: update_mode_t, p: ?*const proplist, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const proplist_remove = pa_context_proplist_remove;
+    extern fn pa_context_proplist_remove(c: *context, keys: [*c]const [*:0]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_index = pa_context_get_index;
+    extern fn pa_context_get_index(s: ?*const context) u32;
+    pub const rttime_new = pa_context_rttime_new;
+    extern fn pa_context_rttime_new(c: ?*const context, usec: usec_t, cb: time_event_cb_t, userdata: ?*anyopaque) ?*time_event;
+    pub const rttime_restart = pa_context_rttime_restart;
+    extern fn pa_context_rttime_restart(c: ?*const context, e: ?*time_event, usec: usec_t) void;
+    pub const get_tile_size = pa_context_get_tile_size;
+    extern fn pa_context_get_tile_size(c: ?*const context, ss: [*c]const sample_spec) usize;
+    pub const load_cookie_from_file = pa_context_load_cookie_from_file;
+    extern fn pa_context_load_cookie_from_file(c: *context, cookie_file_path: [*:0]const u8) c_int;
+    pub const get_sink_info_by_name = pa_context_get_sink_info_by_name;
+    extern fn pa_context_get_sink_info_by_name(c: *context, name: [*:0]const u8, cb: sink_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_sink_info_by_index = pa_context_get_sink_info_by_index;
+    extern fn pa_context_get_sink_info_by_index(c: *context, idx: u32, cb: sink_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_sink_info_list = pa_context_get_sink_info_list;
+    extern fn pa_context_get_sink_info_list(c: *context, cb: sink_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_sink_volume_by_index = pa_context_set_sink_volume_by_index;
+    extern fn pa_context_set_sink_volume_by_index(c: *context, idx: u32, volume: [*c]const cvolume, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_sink_volume_by_name = pa_context_set_sink_volume_by_name;
+    extern fn pa_context_set_sink_volume_by_name(c: *context, name: [*:0]const u8, volume: [*c]const cvolume, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_sink_mute_by_index = pa_context_set_sink_mute_by_index;
+    extern fn pa_context_set_sink_mute_by_index(c: *context, idx: u32, mute: c_int, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_sink_mute_by_name = pa_context_set_sink_mute_by_name;
+    extern fn pa_context_set_sink_mute_by_name(c: *context, name: [*:0]const u8, mute: c_int, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const suspend_sink_by_name = pa_context_suspend_sink_by_name;
+    extern fn pa_context_suspend_sink_by_name(c: *context, sink_name: [*:0]const u8, @"suspend": c_int, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const suspend_sink_by_index = pa_context_suspend_sink_by_index;
+    extern fn pa_context_suspend_sink_by_index(c: *context, idx: u32, @"suspend": c_int, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_sink_port_by_index = pa_context_set_sink_port_by_index;
+    extern fn pa_context_set_sink_port_by_index(c: *context, idx: u32, port: [*:0]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_sink_port_by_name = pa_context_set_sink_port_by_name;
+    extern fn pa_context_set_sink_port_by_name(c: *context, name: [*:0]const u8, port: [*:0]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_source_info_by_name = pa_context_get_source_info_by_name;
+    extern fn pa_context_get_source_info_by_name(c: *context, name: [*:0]const u8, cb: source_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_source_info_by_index = pa_context_get_source_info_by_index;
+    extern fn pa_context_get_source_info_by_index(c: *context, idx: u32, cb: source_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_source_info_list = pa_context_get_source_info_list;
+    extern fn pa_context_get_source_info_list(c: *context, cb: source_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_source_volume_by_index = pa_context_set_source_volume_by_index;
+    extern fn pa_context_set_source_volume_by_index(c: *context, idx: u32, volume: [*c]const cvolume, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_source_volume_by_name = pa_context_set_source_volume_by_name;
+    extern fn pa_context_set_source_volume_by_name(c: *context, name: [*:0]const u8, volume: [*c]const cvolume, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_source_mute_by_index = pa_context_set_source_mute_by_index;
+    extern fn pa_context_set_source_mute_by_index(c: *context, idx: u32, mute: c_int, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_source_mute_by_name = pa_context_set_source_mute_by_name;
+    extern fn pa_context_set_source_mute_by_name(c: *context, name: [*:0]const u8, mute: c_int, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const suspend_source_by_name = pa_context_suspend_source_by_name;
+    extern fn pa_context_suspend_source_by_name(c: *context, source_name: [*:0]const u8, @"suspend": c_int, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const suspend_source_by_index = pa_context_suspend_source_by_index;
+    extern fn pa_context_suspend_source_by_index(c: *context, idx: u32, @"suspend": c_int, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_source_port_by_index = pa_context_set_source_port_by_index;
+    extern fn pa_context_set_source_port_by_index(c: *context, idx: u32, port: [*:0]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_source_port_by_name = pa_context_set_source_port_by_name;
+    extern fn pa_context_set_source_port_by_name(c: *context, name: [*:0]const u8, port: [*:0]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_server_info = pa_context_get_server_info;
+    extern fn pa_context_get_server_info(c: *context, cb: server_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_module_info = pa_context_get_module_info;
+    extern fn pa_context_get_module_info(c: *context, idx: u32, cb: module_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_module_info_list = pa_context_get_module_info_list;
+    extern fn pa_context_get_module_info_list(c: *context, cb: module_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const load_module = pa_context_load_module;
+    extern fn pa_context_load_module(c: *context, name: [*:0]const u8, argument: [*:0]const u8, cb: context_index_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const unload_module = pa_context_unload_module;
+    extern fn pa_context_unload_module(c: *context, idx: u32, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const send_message_to_object = pa_context_send_message_to_object;
+    extern fn pa_context_send_message_to_object(c: *context, recipient_name: [*:0]const u8, message: [*:0]const u8, message_parameters: [*:0]const u8, cb: context_string_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_client_info = pa_context_get_client_info;
+    extern fn pa_context_get_client_info(c: *context, idx: u32, cb: client_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_client_info_list = pa_context_get_client_info_list;
+    extern fn pa_context_get_client_info_list(c: *context, cb: client_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const kill_client = pa_context_kill_client;
+    extern fn pa_context_kill_client(c: *context, idx: u32, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_card_info_by_index = pa_context_get_card_info_by_index;
+    extern fn pa_context_get_card_info_by_index(c: *context, idx: u32, cb: card_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_card_info_by_name = pa_context_get_card_info_by_name;
+    extern fn pa_context_get_card_info_by_name(c: *context, name: [*:0]const u8, cb: card_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_card_info_list = pa_context_get_card_info_list;
+    extern fn pa_context_get_card_info_list(c: *context, cb: card_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_card_profile_by_index = pa_context_set_card_profile_by_index;
+    extern fn pa_context_set_card_profile_by_index(c: *context, idx: u32, profile: [*:0]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_card_profile_by_name = pa_context_set_card_profile_by_name;
+    extern fn pa_context_set_card_profile_by_name(c: *context, name: [*:0]const u8, profile: [*:0]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_port_latency_offset = pa_context_set_port_latency_offset;
+    extern fn pa_context_set_port_latency_offset(c: *context, card_name: [*:0]const u8, port_name: [*:0]const u8, offset: i64, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_sink_input_info = pa_context_get_sink_input_info;
+    extern fn pa_context_get_sink_input_info(c: *context, idx: u32, cb: sink_input_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_sink_input_info_list = pa_context_get_sink_input_info_list;
+    extern fn pa_context_get_sink_input_info_list(c: *context, cb: sink_input_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const move_sink_input_by_name = pa_context_move_sink_input_by_name;
+    extern fn pa_context_move_sink_input_by_name(c: *context, idx: u32, sink_name: [*:0]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const move_sink_input_by_index = pa_context_move_sink_input_by_index;
+    extern fn pa_context_move_sink_input_by_index(c: *context, idx: u32, sink_idx: u32, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_sink_input_volume = pa_context_set_sink_input_volume;
+    extern fn pa_context_set_sink_input_volume(c: *context, idx: u32, volume: [*c]const cvolume, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_sink_input_mute = pa_context_set_sink_input_mute;
+    extern fn pa_context_set_sink_input_mute(c: *context, idx: u32, mute: c_int, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const kill_sink_input = pa_context_kill_sink_input;
+    extern fn pa_context_kill_sink_input(c: *context, idx: u32, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_source_output_info = pa_context_get_source_output_info;
+    extern fn pa_context_get_source_output_info(c: *context, idx: u32, cb: source_output_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_source_output_info_list = pa_context_get_source_output_info_list;
+    extern fn pa_context_get_source_output_info_list(c: *context, cb: source_output_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const move_source_output_by_name = pa_context_move_source_output_by_name;
+    extern fn pa_context_move_source_output_by_name(c: *context, idx: u32, source_name: [*:0]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const move_source_output_by_index = pa_context_move_source_output_by_index;
+    extern fn pa_context_move_source_output_by_index(c: *context, idx: u32, source_idx: u32, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_source_output_volume = pa_context_set_source_output_volume;
+    extern fn pa_context_set_source_output_volume(c: *context, idx: u32, volume: [*c]const cvolume, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_source_output_mute = pa_context_set_source_output_mute;
+    extern fn pa_context_set_source_output_mute(c: *context, idx: u32, mute: c_int, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const kill_source_output = pa_context_kill_source_output;
+    extern fn pa_context_kill_source_output(c: *context, idx: u32, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const stat = pa_context_stat;
+    extern fn pa_context_stat(c: *context, cb: stat_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_sample_info_by_name = pa_context_get_sample_info_by_name;
+    extern fn pa_context_get_sample_info_by_name(c: *context, name: [*:0]const u8, cb: sample_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_sample_info_by_index = pa_context_get_sample_info_by_index;
+    extern fn pa_context_get_sample_info_by_index(c: *context, idx: u32, cb: sample_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_sample_info_list = pa_context_get_sample_info_list;
+    extern fn pa_context_get_sample_info_list(c: *context, cb: sample_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_autoload_info_by_name = pa_context_get_autoload_info_by_name;
+    extern fn pa_context_get_autoload_info_by_name(c: *context, name: [*:0]const u8, @"type": autoload_type_t, cb: autoload_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_autoload_info_by_index = pa_context_get_autoload_info_by_index;
+    extern fn pa_context_get_autoload_info_by_index(c: *context, idx: u32, cb: autoload_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const get_autoload_info_list = pa_context_get_autoload_info_list;
+    extern fn pa_context_get_autoload_info_list(c: *context, cb: autoload_info_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const add_autoload = pa_context_add_autoload;
+    extern fn pa_context_add_autoload(c: *context, name: [*:0]const u8, @"type": autoload_type_t, module: [*:0]const u8, argument: [*:0]const u8, context_index_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const remove_autoload_by_name = pa_context_remove_autoload_by_name;
+    extern fn pa_context_remove_autoload_by_name(c: *context, name: [*:0]const u8, @"type": autoload_type_t, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const remove_autoload_by_index = pa_context_remove_autoload_by_index;
+    extern fn pa_context_remove_autoload_by_index(c: *context, idx: u32, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const subscribe = pa_context_subscribe;
+    extern fn pa_context_subscribe(c: *context, m: subscription_mask_t, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const set_subscribe_callback = pa_context_set_subscribe_callback;
+    extern fn pa_context_set_subscribe_callback(c: *context, cb: context_subscribe_cb_t, userdata: ?*anyopaque) void;
+    pub const remove_sample = pa_context_remove_sample;
+    extern fn pa_context_remove_sample(c: *context, name: [*:0]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const play_sample = pa_context_play_sample;
+    extern fn pa_context_play_sample(c: *context, name: [*:0]const u8, dev: [*:0]const u8, volume: volume_t, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub const play_sample_with_proplist = pa_context_play_sample_with_proplist;
+    extern fn pa_context_play_sample_with_proplist(c: *context, name: [*:0]const u8, dev: [*:0]const u8, volume: volume_t, proplist: ?*const proplist, cb: context_play_sample_cb_t, userdata: ?*anyopaque) ?*operation;
+};
 
 pub const context_state_t = enum(c_uint) {
     UNCONNECTED = 0,
@@ -335,18 +522,18 @@ pub const timing_info = extern struct {
     since_underrun: i64,
 };
 pub const sink_info = extern struct {
-    name: [*c]const u8,
+    name: [*:0]const u8,
     index: u32,
-    description: [*c]const u8,
+    description: [*:0]const u8,
     sample_spec: sample_spec,
     channel_map: channel_map,
     owner_module: u32,
     volume: cvolume,
     mute: c_int,
     monitor_source: u32,
-    monitor_source_name: [*c]const u8,
+    monitor_source_name: [*:0]const u8,
     latency: usec_t,
-    driver: [*c]const u8,
+    driver: [*:0]const u8,
     flags: sink_flags_t,
     proplist: ?*proplist,
     configured_latency: usec_t,
@@ -383,26 +570,26 @@ pub const sink_state_t = enum(c_int) {
     UNLINKED = -3,
 };
 pub const sink_port_info = extern struct {
-    name: [*c]const u8,
-    description: [*c]const u8,
+    name: [*:0]const u8,
+    description: [*:0]const u8,
     priority: u32,
     available: c_int,
-    availability_group: [*c]const u8,
+    availability_group: [*:0]const u8,
     type: u32,
 };
 pub const source_info = extern struct {
-    name: [*c]const u8,
+    name: [*:0]const u8,
     index: u32,
-    description: [*c]const u8,
+    description: [*:0]const u8,
     sample_spec: sample_spec,
     channel_map: channel_map,
     owner_module: u32,
     volume: cvolume,
     mute: c_int,
     monitor_of_sink: u32,
-    monitor_of_sink_name: [*c]const u8,
+    monitor_of_sink_name: [*:0]const u8,
     latency: usec_t,
-    driver: [*c]const u8,
+    driver: [*:0]const u8,
     flags: source_flags_t,
     proplist: ?*proplist,
     configured_latency: usec_t,
@@ -417,36 +604,36 @@ pub const source_info = extern struct {
     formats: [*c][*c]format_info,
 };
 pub const server_info = extern struct {
-    user_name: [*c]const u8,
-    host_name: [*c]const u8,
-    server_version: [*c]const u8,
-    server_name: [*c]const u8,
+    user_name: [*:0]const u8,
+    host_name: [*:0]const u8,
+    server_version: [*:0]const u8,
+    server_name: [*:0]const u8,
     sample_spec: sample_spec,
-    default_sink_name: [*c]const u8,
-    default_source_name: [*c]const u8,
+    default_sink_name: [*:0]const u8,
+    default_source_name: [*:0]const u8,
     cookie: u32,
     channel_map: channel_map,
 };
 pub const module_info = extern struct {
     index: u32,
-    name: [*c]const u8,
-    argument: [*c]const u8,
+    name: [*:0]const u8,
+    argument: [*:0]const u8,
     n_used: u32,
     auto_unload: c_int,
     proplist: ?*proplist,
 };
 pub const client_info = extern struct {
     index: u32,
-    name: [*c]const u8,
+    name: [*:0]const u8,
     owner_module: u32,
-    driver: [*c]const u8,
+    driver: [*:0]const u8,
     proplist: ?*proplist,
 };
 pub const card_info = extern struct {
     index: u32,
-    name: [*c]const u8,
+    name: [*:0]const u8,
     owner_module: u32,
-    driver: [*c]const u8,
+    driver: [*:0]const u8,
     n_profiles: u32,
     profiles: [*c]card_profile_info,
     active_profile: [*c]card_profile_info,
@@ -458,7 +645,7 @@ pub const card_info = extern struct {
 };
 pub const sink_input_info = extern struct {
     index: u32,
-    name: [*c]const u8,
+    name: [*:0]const u8,
     owner_module: u32,
     client: u32,
     sink: u32,
@@ -467,8 +654,8 @@ pub const sink_input_info = extern struct {
     volume: cvolume,
     buffer_usec: usec_t,
     sink_usec: usec_t,
-    resample_method: [*c]const u8,
-    driver: [*c]const u8,
+    resample_method: [*:0]const u8,
+    driver: [*:0]const u8,
     mute: c_int,
     proplist: ?*proplist,
     corked: c_int,
@@ -478,7 +665,7 @@ pub const sink_input_info = extern struct {
 };
 pub const source_output_info = extern struct {
     index: u32,
-    name: [*c]const u8,
+    name: [*:0]const u8,
     owner_module: u32,
     client: u32,
     source: u32,
@@ -486,8 +673,8 @@ pub const source_output_info = extern struct {
     channel_map: channel_map,
     buffer_usec: usec_t,
     source_usec: usec_t,
-    resample_method: [*c]const u8,
-    driver: [*c]const u8,
+    resample_method: [*:0]const u8,
+    driver: [*:0]const u8,
     proplist: ?*proplist,
     corked: c_int,
     volume: cvolume,
@@ -505,22 +692,22 @@ pub const stat_info = extern struct {
 };
 pub const sample_info = extern struct {
     index: u32,
-    name: [*c]const u8,
+    name: [*:0]const u8,
     volume: cvolume,
     sample_spec: sample_spec,
     channel_map: channel_map,
     duration: usec_t,
     bytes: u32,
     lazy: c_int,
-    filename: [*c]const u8,
+    filename: [*:0]const u8,
     proplist: ?*proplist,
 };
 pub const autoload_info = extern struct {
     index: u32,
-    name: [*c]const u8,
+    name: [*:0]const u8,
     type: autoload_type_t,
-    module: [*c]const u8,
-    argument: [*c]const u8,
+    module: [*:0]const u8,
+    argument: [*:0]const u8,
 };
 pub const signal_event = opaque {};
 pub const source_flags_t = enum(c_uint) {
@@ -544,16 +731,16 @@ pub const source_state_t = enum(c_int) {
     UNLINKED = -3,
 };
 pub const source_port_info = extern struct {
-    name: [*c]const u8,
-    description: [*c]const u8,
+    name: [*:0]const u8,
+    description: [*:0]const u8,
     priority: u32,
     available: c_int,
-    availability_group: [*c]const u8,
+    availability_group: [*:0]const u8,
     type: u32,
 };
 pub const card_profile_info = extern struct {
-    name: [*c]const u8,
-    description: [*c]const u8,
+    name: [*:0]const u8,
+    description: [*:0]const u8,
     n_sinks: u32,
     n_sources: u32,
     priority: u32,
@@ -589,8 +776,8 @@ pub const threaded_mainloop = opaque {
     extern fn pa_threaded_mainloop_once_unlocked(m: *threaded_mainloop, callback: *const fn (*threaded_mainloop, ?*anyopaque) callconv(.c) void, userdata: ?*anyopaque) void;
 };
 pub const card_port_info = extern struct {
-    name: [*c]const u8,
-    description: [*c]const u8,
+    name: [*:0]const u8,
+    description: [*:0]const u8,
     priority: u32,
     available: c_int,
     direction: c_int,
@@ -599,12 +786,12 @@ pub const card_port_info = extern struct {
     proplist: ?*proplist,
     latency_offset: i64,
     profiles2: [*c][*c]card_profile_info2,
-    availability_group: [*c]const u8,
+    availability_group: [*:0]const u8,
     type: u32,
 };
 pub const card_profile_info2 = extern struct {
-    name: [*c]const u8,
-    description: [*c]const u8,
+    name: [*:0]const u8,
+    description: [*:0]const u8,
     n_sinks: u32,
     n_sources: u32,
     priority: u32,
@@ -669,7 +856,7 @@ extern fn pa_sample_format_is_le(f: sample_format_t) c_int;
 extern fn pa_sample_format_is_be(f: sample_format_t) c_int;
 extern fn pa_direction_valid(direction: direction_t) c_int;
 extern fn pa_direction_to_string(direction: direction_t) [*c]const u8;
-extern fn pa_mainloop_api_once(m: [*c]mainloop_api, callback: ?*const fn ([*c]mainloop_api, ?*anyopaque) callconv(.c) void, userdata: ?*anyopaque) void;
+extern fn pa_mainloop_api_once(m: *mainloop_api, callback: ?*const fn (*mainloop_api, ?*anyopaque) callconv(.c) void, userdata: ?*anyopaque) void;
 extern fn pa_channel_map_init(m: [*c]channel_map) [*c]channel_map;
 extern fn pa_channel_map_init_mono(m: [*c]channel_map) [*c]channel_map;
 extern fn pa_channel_map_init_stereo(m: [*c]channel_map) [*c]channel_map;
@@ -728,33 +915,6 @@ extern fn pa_operation_unref(o: ?*operation) void;
 extern fn pa_operation_cancel(o: ?*operation) void;
 extern fn pa_operation_get_state(o: ?*const operation) operation_state_t;
 extern fn pa_operation_set_state_callback(o: ?*operation, cb: operation_notify_cb_t, userdata: ?*anyopaque) void;
-extern fn pa_context_new(mainloop: [*c]mainloop_api, name: [*c]const u8) ?*context;
-extern fn pa_context_new_with_proplist(mainloop: [*c]mainloop_api, name: [*c]const u8, proplist: ?*const proplist) ?*context;
-extern fn pa_context_unref(c: ?*context) void;
-extern fn pa_context_ref(c: ?*context) ?*context;
-extern fn pa_context_set_state_callback(c: ?*context, cb: context_notify_cb_t, userdata: ?*anyopaque) void;
-extern fn pa_context_set_event_callback(p: ?*context, cb: context_event_cb_t, userdata: ?*anyopaque) void;
-extern fn pa_context_errno(c: ?*const context) c_int;
-extern fn pa_context_is_pending(c: ?*const context) c_int;
-extern fn pa_context_get_state(c: ?*const context) context_state_t;
-extern fn pa_context_connect(c: ?*context, server: [*c]const u8, flags: context_flags_t, api: [*c]const spawn_api) c_int;
-extern fn pa_context_disconnect(c: ?*context) void;
-extern fn pa_context_drain(c: ?*context, cb: context_notify_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_exit_daemon(c: ?*context, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_default_sink(c: ?*context, name: [*c]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_default_source(c: ?*context, name: [*c]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_is_local(c: ?*const context) c_int;
-extern fn pa_context_set_name(c: ?*context, name: [*c]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_server(c: ?*const context) [*c]const u8;
-extern fn pa_context_get_protocol_version(c: ?*const context) u32;
-extern fn pa_context_get_server_protocol_version(c: ?*const context) u32;
-extern fn pa_context_proplist_update(c: ?*context, mode: update_mode_t, p: ?*const proplist, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_proplist_remove(c: ?*context, keys: [*c]const [*c]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_index(s: ?*const context) u32;
-extern fn pa_context_rttime_new(c: ?*const context, usec: usec_t, cb: time_event_cb_t, userdata: ?*anyopaque) ?*time_event;
-extern fn pa_context_rttime_restart(c: ?*const context, e: ?*time_event, usec: usec_t) void;
-extern fn pa_context_get_tile_size(c: ?*const context, ss: [*c]const sample_spec) usize;
-extern fn pa_context_load_cookie_from_file(c: ?*context, cookie_file_path: [*c]const u8) c_int;
 extern fn pa_cvolume_equal(a: [*c]const cvolume, b: [*c]const cvolume) c_int;
 extern fn pa_cvolume_init(a: [*c]cvolume) [*c]cvolume;
 extern fn pa_cvolume_set(a: [*c]cvolume, channels: c_uint, v: volume_t) [*c]cvolume;
@@ -854,74 +1014,8 @@ extern fn pa_stream_proplist_update(s: ?*stream, mode: update_mode_t, p: ?*propl
 extern fn pa_stream_proplist_remove(s: ?*stream, keys: [*c]const [*c]const u8, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
 extern fn pa_stream_set_monitor_stream(s: ?*stream, sink_input_idx: u32) c_int;
 extern fn pa_stream_get_monitor_stream(s: ?*const stream) u32;
-extern fn pa_context_get_sink_info_by_name(c: ?*context, name: [*c]const u8, cb: sink_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_sink_info_by_index(c: ?*context, idx: u32, cb: sink_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_sink_info_list(c: ?*context, cb: sink_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_sink_volume_by_index(c: ?*context, idx: u32, volume: [*c]const cvolume, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_sink_volume_by_name(c: ?*context, name: [*c]const u8, volume: [*c]const cvolume, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_sink_mute_by_index(c: ?*context, idx: u32, mute: c_int, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_sink_mute_by_name(c: ?*context, name: [*c]const u8, mute: c_int, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_suspend_sink_by_name(c: ?*context, sink_name: [*c]const u8, @"suspend": c_int, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_suspend_sink_by_index(c: ?*context, idx: u32, @"suspend": c_int, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_sink_port_by_index(c: ?*context, idx: u32, port: [*c]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_sink_port_by_name(c: ?*context, name: [*c]const u8, port: [*c]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_source_info_by_name(c: ?*context, name: [*c]const u8, cb: source_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_source_info_by_index(c: ?*context, idx: u32, cb: source_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_source_info_list(c: ?*context, cb: source_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_source_volume_by_index(c: ?*context, idx: u32, volume: [*c]const cvolume, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_source_volume_by_name(c: ?*context, name: [*c]const u8, volume: [*c]const cvolume, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_source_mute_by_index(c: ?*context, idx: u32, mute: c_int, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_source_mute_by_name(c: ?*context, name: [*c]const u8, mute: c_int, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_suspend_source_by_name(c: ?*context, source_name: [*c]const u8, @"suspend": c_int, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_suspend_source_by_index(c: ?*context, idx: u32, @"suspend": c_int, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_source_port_by_index(c: ?*context, idx: u32, port: [*c]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_source_port_by_name(c: ?*context, name: [*c]const u8, port: [*c]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_server_info(c: ?*context, cb: server_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_module_info(c: ?*context, idx: u32, cb: module_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_module_info_list(c: ?*context, cb: module_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_load_module(c: ?*context, name: [*c]const u8, argument: [*c]const u8, cb: context_index_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_unload_module(c: ?*context, idx: u32, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_send_message_to_object(c: ?*context, recipient_name: [*c]const u8, message: [*c]const u8, message_parameters: [*c]const u8, cb: context_string_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_client_info(c: ?*context, idx: u32, cb: client_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_client_info_list(c: ?*context, cb: client_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_kill_client(c: ?*context, idx: u32, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_card_info_by_index(c: ?*context, idx: u32, cb: card_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_card_info_by_name(c: ?*context, name: [*c]const u8, cb: card_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_card_info_list(c: ?*context, cb: card_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_card_profile_by_index(c: ?*context, idx: u32, profile: [*c]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_card_profile_by_name(c: ?*context, name: [*c]const u8, profile: [*c]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_port_latency_offset(c: ?*context, card_name: [*c]const u8, port_name: [*c]const u8, offset: i64, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_sink_input_info(c: ?*context, idx: u32, cb: sink_input_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_sink_input_info_list(c: ?*context, cb: sink_input_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_move_sink_input_by_name(c: ?*context, idx: u32, sink_name: [*c]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_move_sink_input_by_index(c: ?*context, idx: u32, sink_idx: u32, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_sink_input_volume(c: ?*context, idx: u32, volume: [*c]const cvolume, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_sink_input_mute(c: ?*context, idx: u32, mute: c_int, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_kill_sink_input(c: ?*context, idx: u32, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_source_output_info(c: ?*context, idx: u32, cb: source_output_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_source_output_info_list(c: ?*context, cb: source_output_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_move_source_output_by_name(c: ?*context, idx: u32, source_name: [*c]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_move_source_output_by_index(c: ?*context, idx: u32, source_idx: u32, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_source_output_volume(c: ?*context, idx: u32, volume: [*c]const cvolume, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_source_output_mute(c: ?*context, idx: u32, mute: c_int, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_kill_source_output(c: ?*context, idx: u32, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_stat(c: ?*context, cb: stat_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_sample_info_by_name(c: ?*context, name: [*c]const u8, cb: sample_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_sample_info_by_index(c: ?*context, idx: u32, cb: sample_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_sample_info_list(c: ?*context, cb: sample_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_autoload_info_by_name(c: ?*context, name: [*c]const u8, @"type": autoload_type_t, cb: autoload_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_autoload_info_by_index(c: ?*context, idx: u32, cb: autoload_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_get_autoload_info_list(c: ?*context, cb: autoload_info_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_add_autoload(c: ?*context, name: [*c]const u8, @"type": autoload_type_t, module: [*c]const u8, argument: [*c]const u8, context_index_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_remove_autoload_by_name(c: ?*context, name: [*c]const u8, @"type": autoload_type_t, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_remove_autoload_by_index(c: ?*context, idx: u32, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_subscribe(c: ?*context, m: subscription_mask_t, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_set_subscribe_callback(c: ?*context, cb: context_subscribe_cb_t, userdata: ?*anyopaque) void;
 extern fn pa_stream_connect_upload(s: ?*stream, length: usize) c_int;
 extern fn pa_stream_finish_upload(s: ?*stream) c_int;
-extern fn pa_context_remove_sample(c: ?*context, name: [*c]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_play_sample(c: ?*context, name: [*c]const u8, dev: [*c]const u8, volume: volume_t, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-extern fn pa_context_play_sample_with_proplist(c: ?*context, name: [*c]const u8, dev: [*c]const u8, volume: volume_t, proplist: ?*const proplist, cb: context_play_sample_cb_t, userdata: ?*anyopaque) ?*operation;
 extern fn pa_strerror(@"error": c_int) [*c]const u8;
 extern fn pa_xmalloc(l: usize) ?*anyopaque;
 extern fn pa_xmalloc0(l: usize) ?*anyopaque;
@@ -944,11 +1038,11 @@ extern fn pa_mainloop_dispatch(m: ?*mainloop) c_int;
 extern fn pa_mainloop_get_retval(m: ?*const mainloop) c_int;
 extern fn pa_mainloop_iterate(m: ?*mainloop, block: c_int, retval: [*c]c_int) c_int;
 extern fn pa_mainloop_run(m: ?*mainloop, retval: [*c]c_int) c_int;
-extern fn pa_mainloop_get_api(m: ?*mainloop) [*c]mainloop_api;
+extern fn pa_mainloop_get_api(m: ?*mainloop) *mainloop_api;
 extern fn pa_mainloop_quit(m: ?*mainloop, retval: c_int) void;
 extern fn pa_mainloop_wakeup(m: ?*mainloop) void;
 extern fn pa_mainloop_set_poll_func(m: ?*mainloop, poll_func: poll_func, userdata: ?*anyopaque) void;
-extern fn pa_signal_init(api: [*c]mainloop_api) c_int;
+extern fn pa_signal_init(api: *mainloop_api) c_int;
 extern fn pa_signal_done() void;
 extern fn pa_signal_new(sig: c_int, callback: signal_cb_t, userdata: ?*anyopaque) ?*signal_event;
 extern fn pa_signal_free(e: ?*signal_event) void;
