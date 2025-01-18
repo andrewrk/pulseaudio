@@ -63,6 +63,7 @@ pub fn main() !void {
         const stream = try pa.stream.new(context, "main stream", &sample_spec, &channel_map);
 
         stream.set_state_callback(streamStateCallback, &pulse);
+        stream.set_write_callback(streamWriteCallback, &pulse);
 
         try stream.connect_playback(null, null, .{
             .START_CORKED = true,
@@ -90,12 +91,10 @@ pub fn main() !void {
             std.log.info("fixed_channel_map[{d}]={s}", .{ i, @tagName(channel) });
         }
     }
-
-    //stream.set_write_callback(writeCallback, &pulse);
 }
 
-fn contextStateCallback(context: *pa.context, pulse_opaque: ?*anyopaque) callconv(.c) void {
-    const pulse: *Pulse = @ptrCast(@alignCast(pulse_opaque));
+fn contextStateCallback(context: *pa.context, userdata: ?*anyopaque) callconv(.c) void {
+    const pulse: *Pulse = @ptrCast(@alignCast(userdata));
     pulse.state = context.get_state();
     std.log.info("context state: {s}", .{@tagName(pulse.state)});
     switch (pulse.state) {
@@ -104,12 +103,30 @@ fn contextStateCallback(context: *pa.context, pulse_opaque: ?*anyopaque) callcon
     }
 }
 
-fn streamStateCallback(stream: *pa.stream, pulse_opaque: ?*anyopaque) callconv(.c) void {
-    const pulse: *Pulse = @ptrCast(@alignCast(pulse_opaque));
+fn streamStateCallback(stream: *pa.stream, userdata: ?*anyopaque) callconv(.c) void {
+    const pulse: *Pulse = @ptrCast(@alignCast(userdata));
     pulse.stream_state = stream.get_state();
     std.log.info("stream state: {s}", .{@tagName(pulse.stream_state)});
     switch (pulse.stream_state) {
         .UNCONNECTED, .CREATING => return,
         .READY, .FAILED, .TERMINATED => pulse.main_loop.signal(0),
+    }
+}
+
+fn streamWriteCallback(stream: *pa.stream, requested_bytes: usize, userdata: ?*anyopaque) callconv(.c) void {
+    const pulse: *Pulse = @ptrCast(@alignCast(userdata));
+    _ = pulse;
+    std.log.info("requested bytes: {d}", .{requested_bytes});
+    var remaining_bytes = requested_bytes;
+    while (remaining_bytes > 0) {
+        var ptr_len: usize = std.math.maxInt(usize);
+        var opt_ptr: ?[*]i32 = null;
+        stream.begin_write(@ptrCast(&opt_ptr), &ptr_len) catch @panic("unhandleable error");
+        const ptr = opt_ptr orelse @panic("unhandleable error");
+        const write_len = @min(ptr_len, remaining_bytes);
+        @memset(ptr[0..write_len], 0);
+        stream.write(ptr, write_len, null, 0, .RELATIVE) catch @panic("unhandleable error");
+        remaining_bytes -= write_len;
+        std.log.info("wrote {d} bytes, {d} remaining", .{ write_len, remaining_bytes });
     }
 }

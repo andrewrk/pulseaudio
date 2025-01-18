@@ -71,7 +71,7 @@ pub const operation_notify_cb_t = ?*const fn (?*operation, ?*anyopaque) callconv
 pub const context_notify_cb_t = *const fn (*context, ?*anyopaque) callconv(.c) void;
 pub const context_event_cb_t = ?*const fn (*context, [*c]const u8, ?*proplist, ?*anyopaque) callconv(.c) void;
 pub const context_success_cb_t = ?*const fn (*context, c_int, ?*anyopaque) callconv(.c) void;
-pub const free_cb_t = ?*const fn (?*anyopaque) callconv(.c) void;
+pub const free_cb_t = *const fn (?*anyopaque) callconv(.c) void;
 pub const stream_success_cb_t = ?*const fn (*stream, c_int, ?*anyopaque) callconv(.c) void;
 pub const stream_notify_cb_t = ?*const fn (*stream, ?*anyopaque) callconv(.c) void;
 pub const stream_request_cb_t = ?*const fn (*stream, usize, ?*anyopaque) callconv(.c) void;
@@ -518,12 +518,16 @@ pub const stream = opaque {
     extern fn pa_stream_connect_record(s: *stream, dev: [*:0]const u8, attr: ?*const buffer_attr, flags: flags_t) c_int;
     pub const disconnect = pa_stream_disconnect;
     extern fn pa_stream_disconnect(s: *stream) c_int;
-    pub const begin_write = pa_stream_begin_write;
-    extern fn pa_stream_begin_write(p: *stream, data: [*c]?*anyopaque, nbytes: [*c]usize) c_int;
+    pub fn begin_write(p: *stream, data: *?*anyopaque, nbytes: *usize) Error!void {
+        return unwrapError(pa_stream_begin_write(p, data, nbytes));
+    }
+    extern fn pa_stream_begin_write(p: *stream, data: *?*anyopaque, nbytes: *usize) c_int;
     pub const cancel_write = pa_stream_cancel_write;
     extern fn pa_stream_cancel_write(p: *stream) c_int;
-    pub const write = pa_stream_write;
-    extern fn pa_stream_write(p: *stream, data: ?*const anyopaque, nbytes: usize, free_cb: free_cb_t, offset: i64, seek: seek_mode_t) c_int;
+    pub fn write(p: *stream, data: ?*const anyopaque, nbytes: usize, free_cb: ?free_cb_t, offset: i64, seek: seek_mode_t) Error!void {
+        return unwrapError(pa_stream_write(p, data, nbytes, free_cb, offset, seek));
+    }
+    extern fn pa_stream_write(p: *stream, data: ?*const anyopaque, nbytes: usize, free_cb: ?free_cb_t, offset: i64, seek: seek_mode_t) c_int;
     pub const write_ext_free = pa_stream_write_ext_free;
     extern fn pa_stream_write_ext_free(p: *stream, data: ?*const anyopaque, nbytes: usize, free_cb: free_cb_t, free_cb_data: ?*anyopaque, offset: i64, seek: seek_mode_t) c_int;
     pub const peek = pa_stream_peek;
