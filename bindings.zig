@@ -72,10 +72,10 @@ pub const context_notify_cb_t = *const fn (*context, ?*anyopaque) callconv(.c) v
 pub const context_event_cb_t = ?*const fn (*context, [*c]const u8, ?*proplist, ?*anyopaque) callconv(.c) void;
 pub const context_success_cb_t = ?*const fn (*context, c_int, ?*anyopaque) callconv(.c) void;
 pub const free_cb_t = ?*const fn (?*anyopaque) callconv(.c) void;
-pub const stream_success_cb_t = ?*const fn (?*stream, c_int, ?*anyopaque) callconv(.c) void;
-pub const stream_notify_cb_t = ?*const fn (?*stream, ?*anyopaque) callconv(.c) void;
-pub const stream_request_cb_t = ?*const fn (?*stream, usize, ?*anyopaque) callconv(.c) void;
-pub const stream_event_cb_t = ?*const fn (?*stream, [*c]const u8, ?*proplist, ?*anyopaque) callconv(.c) void;
+pub const stream_success_cb_t = ?*const fn (*stream, c_int, ?*anyopaque) callconv(.c) void;
+pub const stream_notify_cb_t = ?*const fn (*stream, ?*anyopaque) callconv(.c) void;
+pub const stream_request_cb_t = ?*const fn (*stream, usize, ?*anyopaque) callconv(.c) void;
+pub const stream_event_cb_t = ?*const fn (*stream, [*c]const u8, ?*proplist, ?*anyopaque) callconv(.c) void;
 pub const sink_info_cb_t = ?*const fn (*context, [*c]const sink_info, c_int, ?*anyopaque) callconv(.c) void;
 pub const source_info_cb_t = ?*const fn (*context, [*c]const source_info, c_int, ?*anyopaque) callconv(.c) void;
 pub const server_info_cb_t = ?*const fn (*context, [*c]const server_info, ?*anyopaque) callconv(.c) void;
@@ -510,10 +510,12 @@ pub const stream = opaque {
     extern fn pa_stream_is_suspended(s: *const stream) c_int;
     pub const is_corked = pa_stream_is_corked;
     extern fn pa_stream_is_corked(s: *const stream) c_int;
-    pub const connect_playback = pa_stream_connect_playback;
-    extern fn pa_stream_connect_playback(s: *stream, dev: [*:0]const u8, attr: [*c]const buffer_attr, flags: flags_t, volume: [*c]const cvolume, sync_stream: *stream) c_int;
+    pub fn connect_playback(s: *stream, dev: ?[*:0]const u8, attr: ?*const buffer_attr, flags: flags_t, volume: ?*const cvolume, sync_stream: ?*stream) Error!void {
+        return unwrapError(pa_stream_connect_playback(s, dev, attr, flags, volume, sync_stream));
+    }
+    extern fn pa_stream_connect_playback(s: *stream, dev: ?[*:0]const u8, attr: ?*const buffer_attr, flags: flags_t, volume: ?*const cvolume, sync_stream: ?*stream) c_int;
     pub const connect_record = pa_stream_connect_record;
-    extern fn pa_stream_connect_record(s: *stream, dev: [*:0]const u8, attr: [*c]const buffer_attr, flags: flags_t) c_int;
+    extern fn pa_stream_connect_record(s: *stream, dev: [*:0]const u8, attr: ?*const buffer_attr, flags: flags_t) c_int;
     pub const disconnect = pa_stream_disconnect;
     extern fn pa_stream_disconnect(s: *stream) c_int;
     pub const begin_write = pa_stream_begin_write;
@@ -583,9 +585,9 @@ pub const stream = opaque {
     pub const get_format_info = pa_stream_get_format_info;
     extern fn pa_stream_get_format_info(s: *const stream) *const format_info;
     pub const get_buffer_attr = pa_stream_get_buffer_attr;
-    extern fn pa_stream_get_buffer_attr(s: *stream) [*c]const buffer_attr;
+    extern fn pa_stream_get_buffer_attr(s: *stream) *const buffer_attr;
     pub const set_buffer_attr = pa_stream_set_buffer_attr;
-    extern fn pa_stream_set_buffer_attr(s: *stream, attr: [*c]const buffer_attr, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    extern fn pa_stream_set_buffer_attr(s: *stream, attr: *const buffer_attr, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const update_sample_rate = pa_stream_update_sample_rate;
     extern fn pa_stream_update_sample_rate(s: *stream, rate: u32, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const proplist_update = pa_stream_proplist_update;
@@ -609,7 +611,7 @@ pub const stream = opaque {
         TERMINATED = 4,
     };
 
-    pub const flags_t = packed struct(u32) {
+    pub const flags_t = packed struct(c_uint) {
         START_CORKED: bool = false,
         INTERPOLATE_TIMING: bool = false,
         NOT_MONOTONIC: bool = false,
@@ -630,7 +632,7 @@ pub const stream = opaque {
         FAIL_ON_SUSPEND: bool = false,
         RELATIVE_VOLUME: bool = false,
         PASSTHROUGH: bool = false,
-        _: u10 = 0,
+        _: u12 = 0,
     };
 };
 
