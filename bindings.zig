@@ -22,6 +22,13 @@ pub const sample_spec = extern struct {
     format: sample_format_t,
     rate: u32,
     channels: u8,
+
+    pub const bytes_per_second = pa_bytes_per_second;
+    extern fn pa_bytes_per_second(spec: *const sample_spec) usize;
+    pub const frame_size = pa_frame_size;
+    extern fn pa_frame_size(spec: *const sample_spec) usize;
+    pub const sample_size = pa_sample_size;
+    extern fn pa_sample_size(spec: *const sample_spec) usize;
 };
 pub const sample_format_t = enum(c_int) {
     U8 = 0,
@@ -39,6 +46,17 @@ pub const sample_format_t = enum(c_int) {
     S24_32BE = 12,
     MAX = 13,
     INVALID = -1,
+
+    pub const sample_size = pa_sample_size_of_format;
+    extern fn pa_sample_size_of_format(f: sample_format_t) usize;
+    pub const to_string = pa_sample_format_to_string;
+    extern fn pa_sample_format_to_string(f: sample_format_t) [*:0]const u8;
+    pub const parse = pa_parse_sample_format;
+    extern fn pa_parse_sample_format(format: [*:0]const u8) sample_format_t;
+    pub const is_le = pa_sample_format_is_le;
+    extern fn pa_sample_format_is_le(f: sample_format_t) c_int;
+    pub const is_be = pa_sample_format_is_be;
+    extern fn pa_sample_format_is_be(f: sample_format_t) c_int;
 };
 pub const usec_t = u64;
 pub const direction_t = enum(c_uint) {
@@ -1005,10 +1023,6 @@ pub const subscription_event_type_t = enum(c_uint) {
 pub const poll_func = ?*const fn (?*std.c.pollfd, c_ulong, c_int, ?*anyopaque) callconv(.c) c_int;
 
 extern fn pa_get_library_version() [*:0]const u8;
-extern fn pa_bytes_per_second(spec: [*c]const sample_spec) usize;
-extern fn pa_frame_size(spec: [*c]const sample_spec) usize;
-extern fn pa_sample_size(spec: [*c]const sample_spec) usize;
-extern fn pa_sample_size_of_format(f: sample_format_t) usize;
 extern fn pa_bytes_to_usec(length: u64, spec: [*c]const sample_spec) usec_t;
 extern fn pa_usec_to_bytes(t: usec_t, spec: [*c]const sample_spec) usize;
 extern fn pa_sample_spec_init(spec: [*c]sample_spec) [*c]sample_spec;
@@ -1017,12 +1031,8 @@ extern fn pa_sample_rate_valid(rate: u32) c_int;
 extern fn pa_channels_valid(channels: u8) c_int;
 extern fn pa_sample_spec_valid(spec: [*c]const sample_spec) c_int;
 extern fn pa_sample_spec_equal(a: [*c]const sample_spec, b: [*c]const sample_spec) c_int;
-extern fn pa_sample_format_to_string(f: sample_format_t) [*c]const u8;
-extern fn pa_parse_sample_format(format: [*c]const u8) sample_format_t;
 extern fn pa_sample_spec_snprint(s: [*c]u8, l: usize, spec: [*c]const sample_spec) [*c]u8;
 extern fn pa_bytes_snprint(s: [*c]u8, l: usize, v: c_uint) [*c]u8;
-extern fn pa_sample_format_is_le(f: sample_format_t) c_int;
-extern fn pa_sample_format_is_be(f: sample_format_t) c_int;
 extern fn pa_direction_valid(direction: direction_t) c_int;
 extern fn pa_direction_to_string(direction: direction_t) [*c]const u8;
 extern fn pa_mainloop_api_once(m: *mainloop_api, callback: ?*const fn (*mainloop_api, ?*anyopaque) callconv(.c) void, userdata: ?*anyopaque) void;
