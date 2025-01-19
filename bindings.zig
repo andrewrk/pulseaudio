@@ -572,9 +572,9 @@ pub const stream = opaque {
     pub const readable_size = pa_stream_readable_size;
     extern fn pa_stream_readable_size(p: *const stream) usize;
     pub const drain = pa_stream_drain;
-    extern fn pa_stream_drain(s: *stream, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    extern fn pa_stream_drain(s: *stream, cb: ?stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const update_timing_info = pa_stream_update_timing_info;
-    extern fn pa_stream_update_timing_info(p: *stream, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    extern fn pa_stream_update_timing_info(p: *stream, cb: ?stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const set_state_callback = pa_stream_set_state_callback;
     extern fn pa_stream_set_state_callback(s: *stream, cb: stream_notify_cb_t, userdata: ?*anyopaque) void;
     pub const set_write_callback = pa_stream_set_write_callback;
@@ -604,13 +604,15 @@ pub const stream = opaque {
     }
     extern fn pa_stream_cork(s: *stream, b: c_int, cb: ?stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const flush = pa_stream_flush;
-    extern fn pa_stream_flush(s: *stream, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    extern fn pa_stream_flush(s: *stream, cb: ?stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const prebuf = pa_stream_prebuf;
-    extern fn pa_stream_prebuf(s: *stream, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    extern fn pa_stream_prebuf(s: *stream, cb: ?stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const trigger = pa_stream_trigger;
-    extern fn pa_stream_trigger(s: *stream, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
-    pub const set_name = pa_stream_set_name;
-    extern fn pa_stream_set_name(s: *stream, name: [*:0]const u8, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    extern fn pa_stream_trigger(s: *stream, cb: ?stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    pub fn set_name(s: *stream, name: [*:0]const u8, cb: ?stream_success_cb_t, userdata: ?*anyopaque) error{OutOfMemory}!*operation {
+        return pa_stream_set_name(s, name, cb, userdata) orelse return error.OutOfMemory;
+    }
+    extern fn pa_stream_set_name(s: *stream, name: [*:0]const u8, cb: ?stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const get_time = pa_stream_get_time;
     extern fn pa_stream_get_time(s: *stream, r_usec: [*c]usec_t) c_int;
     pub const get_latency = pa_stream_get_latency;
@@ -626,13 +628,13 @@ pub const stream = opaque {
     pub const get_buffer_attr = pa_stream_get_buffer_attr;
     extern fn pa_stream_get_buffer_attr(s: *stream) *const buffer_attr;
     pub const set_buffer_attr = pa_stream_set_buffer_attr;
-    extern fn pa_stream_set_buffer_attr(s: *stream, attr: *const buffer_attr, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    extern fn pa_stream_set_buffer_attr(s: *stream, attr: *const buffer_attr, cb: ?stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const update_sample_rate = pa_stream_update_sample_rate;
-    extern fn pa_stream_update_sample_rate(s: *stream, rate: u32, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    extern fn pa_stream_update_sample_rate(s: *stream, rate: u32, cb: ?stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const proplist_update = pa_stream_proplist_update;
-    extern fn pa_stream_proplist_update(s: *stream, mode: update_mode_t, p: ?*proplist, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    extern fn pa_stream_proplist_update(s: *stream, mode: update_mode_t, p: ?*proplist, cb: ?stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const proplist_remove = pa_stream_proplist_remove;
-    extern fn pa_stream_proplist_remove(s: *stream, keys: [*c]const [*:0]const u8, cb: stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
+    extern fn pa_stream_proplist_remove(s: *stream, keys: [*c]const [*:0]const u8, cb: ?stream_success_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const set_monitor_stream = pa_stream_set_monitor_stream;
     extern fn pa_stream_set_monitor_stream(s: *stream, sink_input_idx: u32) c_int;
     pub const get_monitor_stream = pa_stream_get_monitor_stream;
