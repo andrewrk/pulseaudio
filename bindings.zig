@@ -1004,7 +1004,36 @@ pub const subscription_mask_t = enum(c_uint) {
     CARD = 512,
     ALL = 767,
 };
-pub const mainloop = opaque {};
+pub const mainloop = opaque {
+    pub fn new() error{OutOfMemory}!*mainloop {
+        return pa_mainloop_new() orelse return error.OutOfMemory;
+    }
+    extern fn pa_mainloop_new() ?*mainloop;
+    pub const free = pa_mainloop_free;
+    extern fn pa_mainloop_free(m: ?*mainloop) void;
+    pub const prepare = pa_mainloop_prepare;
+    extern fn pa_mainloop_prepare(m: ?*mainloop, timeout: c_int) c_int;
+    pub const poll = pa_mainloop_poll;
+    extern fn pa_mainloop_poll(m: ?*mainloop) c_int;
+    pub const dispatch = pa_mainloop_dispatch;
+    extern fn pa_mainloop_dispatch(m: ?*mainloop) c_int;
+    pub const get_retval = pa_mainloop_get_retval;
+    extern fn pa_mainloop_get_retval(m: ?*const mainloop) c_int;
+    pub fn iterate(m: *mainloop, block: enum(u1) { nonblocking = 0, blocking = 1 }, quit_result: ?*c_int) c_int {
+        return pa_mainloop_iterate(m, @intFromEnum(block), quit_result);
+    }
+    extern fn pa_mainloop_iterate(m: ?*mainloop, block: c_int, retval: [*c]c_int) c_int;
+    pub const run = pa_mainloop_run;
+    extern fn pa_mainloop_run(m: ?*mainloop, retval: [*c]c_int) c_int;
+    pub const get_api = pa_mainloop_get_api;
+    extern fn pa_mainloop_get_api(m: ?*mainloop) *mainloop_api;
+    pub const quit = pa_mainloop_quit;
+    extern fn pa_mainloop_quit(m: ?*mainloop, retval: c_int) void;
+    pub const wakeup = pa_mainloop_wakeup;
+    extern fn pa_mainloop_wakeup(m: ?*mainloop) void;
+    pub const set_poll_func = pa_mainloop_set_poll_func;
+    extern fn pa_mainloop_set_poll_func(m: ?*mainloop, poll_func: poll_func, userdata: ?*anyopaque) void;
+};
 pub const subscription_event_type_t = enum(c_uint) {
     SINK = 0,
     SOURCE = 1,
@@ -1149,18 +1178,6 @@ extern fn pa_utf8_filter(str: [*c]const u8) [*c]u8;
 extern fn pa_ascii_filter(str: [*c]const u8) [*c]u8;
 extern fn pa_utf8_to_locale(str: [*c]const u8) [*c]u8;
 extern fn pa_locale_to_utf8(str: [*c]const u8) [*c]u8;
-extern fn pa_mainloop_new() ?*mainloop;
-extern fn pa_mainloop_free(m: ?*mainloop) void;
-extern fn pa_mainloop_prepare(m: ?*mainloop, timeout: c_int) c_int;
-extern fn pa_mainloop_poll(m: ?*mainloop) c_int;
-extern fn pa_mainloop_dispatch(m: ?*mainloop) c_int;
-extern fn pa_mainloop_get_retval(m: ?*const mainloop) c_int;
-extern fn pa_mainloop_iterate(m: ?*mainloop, block: c_int, retval: [*c]c_int) c_int;
-extern fn pa_mainloop_run(m: ?*mainloop, retval: [*c]c_int) c_int;
-extern fn pa_mainloop_get_api(m: ?*mainloop) *mainloop_api;
-extern fn pa_mainloop_quit(m: ?*mainloop, retval: c_int) void;
-extern fn pa_mainloop_wakeup(m: ?*mainloop) void;
-extern fn pa_mainloop_set_poll_func(m: ?*mainloop, poll_func: poll_func, userdata: ?*anyopaque) void;
 extern fn pa_signal_init(api: *mainloop_api) c_int;
 extern fn pa_signal_done() void;
 extern fn pa_signal_new(sig: c_int, callback: signal_cb_t, userdata: ?*anyopaque) ?*signal_event;
