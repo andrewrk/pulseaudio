@@ -268,10 +268,10 @@ pub fn build(b: *std.Build) void {
     });
     bindings.linkLibrary(lib);
 
-    const sine_exe = b.addExecutable(.{
-        .name = "sine",
+    const sine_threaded_exe = b.addExecutable(.{
+        .name = "sine-threaded",
         .root_module = b.createModule(.{
-            .root_source_file = b.path("example/sine.zig"),
+            .root_source_file = b.path("example/sine-threaded.zig"),
             .target = target,
             .optimize = optimize,
             .imports = &.{
@@ -282,7 +282,23 @@ pub fn build(b: *std.Build) void {
             },
         }),
     });
-    b.installArtifact(sine_exe);
+    b.installArtifact(sine_threaded_exe);
+
+    const sine_mainloop_exe = b.addExecutable(.{
+        .name = "sine-mainloop",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("example/sine-mainloop.zig"),
+            .target = target,
+            .optimize = optimize,
+            .imports = &.{
+                .{
+                    .name = "pulseaudio",
+                    .module = bindings,
+                },
+            },
+        }),
+    });
+    b.installArtifact(sine_mainloop_exe);
 }
 
 fn have(b: bool) ?c_int {
