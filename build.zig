@@ -269,7 +269,11 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    bindings.linkLibrary(lib);
+    if (b.systemIntegrationOption("pulseaudio", .{})) {
+        bindings.linkSystemLibrary("pulse", .{});
+    } else {
+        bindings.linkLibrary(lib);
+    }
 
     const sine_threaded_exe = b.addExecutable(.{
         .name = "sine-threaded",
