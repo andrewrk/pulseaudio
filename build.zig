@@ -11,10 +11,10 @@ pub fn build(b: *std.Build) void {
         .root_module = b.createModule(.{
             .target = target,
             .optimize = optimize,
+            .link_libc = true,
         }),
     });
-    lib.linkLibC();
-    lib.addIncludePath(b.path("src"));
+    lib.root_module.addIncludePath(b.path("src"));
 
     const config_values = .{
         .DESKTOPFILEDIR = "/usr/local/share/applications",
@@ -156,7 +156,7 @@ pub fn build(b: *std.Build) void {
         .top_srcdir = .@"/home/pulseaudio",
     };
 
-    lib.addConfigHeader(b.addConfigHeader(.{
+    lib.root_module.addConfigHeader(b.addConfigHeader(.{
         .style = .blank,
     }, config_values));
 
@@ -165,9 +165,9 @@ pub fn build(b: *std.Build) void {
         .include_path = "pulse/version.h",
     }, config_values);
 
-    lib.addConfigHeader(version_header);
+    lib.root_module.addConfigHeader(version_header);
 
-    lib.addCSourceFiles(.{
+    lib.root_module.addCSourceFiles(.{
         .files = &.{
             "src/pulse/channelmap.c",
             "src/pulse/client-conf.c",
