@@ -275,37 +275,9 @@ pub fn build(b: *std.Build) void {
         bindings.linkLibrary(lib);
     }
 
-    const sine_threaded_exe = b.addExecutable(.{
-        .name = "sine-threaded",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("example/sine-threaded.zig"),
-            .target = target,
-            .optimize = optimize,
-            .imports = &.{
-                .{
-                    .name = "pulseaudio",
-                    .module = bindings,
-                },
-            },
-        }),
-    });
-    b.installArtifact(sine_threaded_exe);
-
-    const sine_mainloop_exe = b.addExecutable(.{
-        .name = "sine-mainloop",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("example/sine-mainloop.zig"),
-            .target = target,
-            .optimize = optimize,
-            .imports = &.{
-                .{
-                    .name = "pulseaudio",
-                    .module = bindings,
-                },
-            },
-        }),
-    });
-    b.installArtifact(sine_mainloop_exe);
+    example(b, target, optimize, bindings, "sine-threaded", "example/sine-threaded.zig");
+    example(b, target, optimize, bindings, "sine-mainloop", "example/sine-mainloop.zig");
+    example(b, target, optimize, bindings, "devices", "example/devices.zig");
 }
 
 fn have(b: bool) ?c_int {
@@ -314,4 +286,29 @@ fn have(b: bool) ?c_int {
     } else {
         return null;
     }
+}
+
+fn example(
+    b: *std.Build,
+    target: std.Build.ResolvedTarget,
+    optimize: std.builtin.OptimizeMode,
+    bindings: *std.Build.Module,
+    name: []const u8,
+    path: []const u8,
+) void {
+    const exe = b.addExecutable(.{
+        .name = name,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path(path),
+            .target = target,
+            .optimize = optimize,
+            .imports = &.{
+                .{
+                    .name = "pulseaudio",
+                    .module = bindings,
+                },
+            },
+        }),
+    });
+    b.installArtifact(exe);
 }
