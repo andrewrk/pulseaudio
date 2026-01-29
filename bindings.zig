@@ -1,15 +1,98 @@
 const std = @import("std");
 const log = std.log.scoped(.pulseaudio);
 
+pub const error_code_t = enum(c_int) {
+    OK = 0,
+    ACCESS = -1,
+    COMMAND = -2,
+    INVALID = -3,
+    EXIST = -4,
+    NOENTITY = -5,
+    CONNECTIONREFUSED = -6,
+    PROTOCOL = -7,
+    TIMEOUT = -8,
+    AUTHKEY = -9,
+    INTERNAL = -10,
+    CONNECTIONTERMINATED = -11,
+    KILLED = -12,
+    INVALIDSERVER = -13,
+    MODINITFAILED = -14,
+    BADSTATE = -15,
+    NODATA = -16,
+    VERSION = -17,
+    TOOLARGE = -18,
+    NOTSUPPORTED = -19,
+    UNKNOWN = -20,
+    NOEXTENSION = -21,
+    OBSOLETE = -22,
+    NOTIMPLEMENTED = -23,
+    FORKED = -24,
+    IO = -25,
+    BUSY = -26,
+    _,
+};
+
 pub const Error = error{
+    AccessDenied,
+    UnknownCommand,
+    InvalidArgument,
+    EntityExists,
+    NoSuchEntity,
+    ConnectionRefused,
+    Protocol,
+    Timeout,
+    NoAuthenticationKey,
+    PulseAudioInternal,
+    ConnectionTerminated,
+    EntityKilled,
+    InvalidServer,
+    ModuleInitializationFailed,
+    BadState,
+    NoData,
+    IncompatibleProtocolVersion,
+    TooLarge,
+    NotSupported,
+    NoSuchExtension,
+    ObsoleteFunctionality,
+    Unimplemented,
+    ClientForked,
+    InputOutput,
+    ResourceBusy,
     Unexpected,
 };
 
-pub fn unwrapError(err: c_int) Error!void {
-    switch (err) {
-        0 => return,
-        else => {
-            log.warn("undocumented pulseaudio error {d}: {s}", .{ err, strerror(err) });
+pub fn unwrapError(integer: c_int) Error!void {
+    const code: error_code_t = @enumFromInt(integer);
+    switch (code) {
+        .OK => return,
+        .ACCESS => return error.AccessDenied,
+        .COMMAND => return error.UnknownCommand,
+        .INVALID => return error.InvalidArgument,
+        .EXIST => return error.EntityExists,
+        .NOENTITY => return error.NoSuchEntity,
+        .CONNECTIONREFUSED => return error.ConnectionRefused,
+        .PROTOCOL => return error.Protocol,
+        .TIMEOUT => return error.Timeout,
+        .AUTHKEY => return error.NoAuthenticationKey,
+        .INTERNAL => return error.PulseAudioInternal,
+        .CONNECTIONTERMINATED => return error.ConnectionTerminated,
+        .KILLED => return error.EntityKilled,
+        .INVALIDSERVER => return error.InvalidServer,
+        .MODINITFAILED => return error.ModuleInitializationFailed,
+        .BADSTATE => return error.BadState,
+        .NODATA => return error.NoData,
+        .VERSION => return error.IncompatibleProtocolVersion,
+        .TOOLARGE => return error.TooLarge,
+        .NOTSUPPORTED => return error.NotSupported,
+        .UNKNOWN => return error.Unexpected,
+        .NOEXTENSION => return error.NoSuchExtension,
+        .OBSOLETE => return error.ObsoleteFunctionality,
+        .NOTIMPLEMENTED => return error.Unimplemented,
+        .FORKED => return error.ClientForked,
+        .IO => return error.InputOutput,
+        .BUSY => return error.ResourceBusy,
+        _ => {
+            log.warn("undocumented pulseaudio error {d}: {s}", .{ code, strerror(integer) });
             return error.Unexpected;
         },
     }
@@ -94,9 +177,9 @@ pub const stream_success_cb_t = *const fn (*stream, c_int, ?*anyopaque) callconv
 pub const stream_notify_cb_t = ?*const fn (*stream, ?*anyopaque) callconv(.c) void;
 pub const stream_request_cb_t = ?*const fn (*stream, usize, ?*anyopaque) callconv(.c) void;
 pub const stream_event_cb_t = ?*const fn (*stream, [*c]const u8, ?*proplist, ?*anyopaque) callconv(.c) void;
-pub const sink_info_cb_t = ?*const fn (*context, [*c]const sink_info, c_int, ?*anyopaque) callconv(.c) void;
-pub const source_info_cb_t = ?*const fn (*context, [*c]const source_info, c_int, ?*anyopaque) callconv(.c) void;
-pub const server_info_cb_t = ?*const fn (*context, [*c]const server_info, ?*anyopaque) callconv(.c) void;
+pub const sink_info_cb_t = ?*const fn (*context, *const sink_info, c_int, ?*anyopaque) callconv(.c) void;
+pub const source_info_cb_t = ?*const fn (*context, *const source_info, c_int, ?*anyopaque) callconv(.c) void;
+pub const server_info_cb_t = ?*const fn (*context, *const server_info, ?*anyopaque) callconv(.c) void;
 pub const module_info_cb_t = ?*const fn (*context, [*c]const module_info, c_int, ?*anyopaque) callconv(.c) void;
 pub const context_index_cb_t = ?*const fn (*context, u32, ?*anyopaque) callconv(.c) void;
 pub const context_string_cb_t = ?*const fn (*context, c_int, [*c]u8, ?*anyopaque) callconv(.c) void;
@@ -108,7 +191,7 @@ pub const stat_info_cb_t = ?*const fn (*context, [*c]const stat_info, ?*anyopaqu
 pub const sample_info_cb_t = ?*const fn (*context, [*c]const sample_info, c_int, ?*anyopaque) callconv(.c) void;
 pub const autoload_info_cb_t = ?*const fn (*context, [*c]const autoload_info, c_int, ?*anyopaque) callconv(.c) void;
 pub const signal_cb_t = ?*const fn (*mainloop_api, ?*signal_event, c_int, ?*anyopaque) callconv(.c) void;
-pub const context_subscribe_cb_t = ?*const fn (*context, subscription_event_type_t, u32, ?*anyopaque) callconv(.c) void;
+pub const context_subscribe_cb_t = ?*const fn (*context, subscription_event_type_t, idx: u32, ?*anyopaque) callconv(.c) void;
 pub const context_play_sample_cb_t = ?*const fn (*context, u32, ?*anyopaque) callconv(.c) void;
 pub const signal_destroy_cb_t = ?*const fn (*mainloop_api, ?*signal_event, ?*anyopaque) callconv(.c) void;
 
@@ -296,12 +379,16 @@ pub const operation_state_t = enum(c_uint) {
     CANCELLED = 2,
 };
 pub const context = opaque {
-    pub const new = pa_context_new;
+    pub fn new(mla: *mainloop_api, name: [*:0]const u8) error{OutOfMemory}!*context {
+        return pa_context_new(mla, name) orelse return error.OutOfMemory;
+    }
     extern fn pa_context_new(mainloop: *mainloop_api, name: [*:0]const u8) ?*context;
+
     pub fn new_with_proplist(mla: *mainloop_api, name: [*:0]const u8, pl: ?*const proplist) error{OutOfMemory}!*context {
         return pa_context_new_with_proplist(mla, name, pl) orelse return error.OutOfMemory;
     }
     extern fn pa_context_new_with_proplist(mainloop: *mainloop_api, name: [*:0]const u8, proplist: ?*const proplist) ?*context;
+
     pub const unref = pa_context_unref;
     extern fn pa_context_unref(c: *context) void;
     pub const ref = pa_context_ref;
@@ -358,8 +445,12 @@ pub const context = opaque {
     extern fn pa_context_get_sink_info_by_name(c: *context, name: [*:0]const u8, cb: sink_info_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const get_sink_info_by_index = pa_context_get_sink_info_by_index;
     extern fn pa_context_get_sink_info_by_index(c: *context, idx: u32, cb: sink_info_cb_t, userdata: ?*anyopaque) ?*operation;
-    pub const get_sink_info_list = pa_context_get_sink_info_list;
+
+    pub fn get_sink_info_list(c: *context, cb: sink_info_cb_t, userdata: ?*anyopaque) error{OutOfMemory}!*operation {
+        return pa_context_get_sink_info_list(c, cb, userdata) orelse return error.OutOfMemory;
+    }
     extern fn pa_context_get_sink_info_list(c: *context, cb: sink_info_cb_t, userdata: ?*anyopaque) ?*operation;
+
     pub const set_sink_volume_by_index = pa_context_set_sink_volume_by_index;
     extern fn pa_context_set_sink_volume_by_index(c: *context, idx: u32, volume: [*c]const cvolume, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const set_sink_volume_by_name = pa_context_set_sink_volume_by_name;
@@ -380,8 +471,12 @@ pub const context = opaque {
     extern fn pa_context_get_source_info_by_name(c: *context, name: [*:0]const u8, cb: source_info_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const get_source_info_by_index = pa_context_get_source_info_by_index;
     extern fn pa_context_get_source_info_by_index(c: *context, idx: u32, cb: source_info_cb_t, userdata: ?*anyopaque) ?*operation;
-    pub const get_source_info_list = pa_context_get_source_info_list;
+
+    pub fn get_source_info_list(c: *context, cb: source_info_cb_t, userdata: ?*anyopaque) error{OutOfMemory}!*operation {
+        return pa_context_get_source_info_list(c, cb, userdata) orelse return error.OutOfMemory;
+    }
     extern fn pa_context_get_source_info_list(c: *context, cb: source_info_cb_t, userdata: ?*anyopaque) ?*operation;
+
     pub const set_source_volume_by_index = pa_context_set_source_volume_by_index;
     extern fn pa_context_set_source_volume_by_index(c: *context, idx: u32, volume: [*c]const cvolume, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const set_source_volume_by_name = pa_context_set_source_volume_by_name;
@@ -398,8 +493,12 @@ pub const context = opaque {
     extern fn pa_context_set_source_port_by_index(c: *context, idx: u32, port: [*:0]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const set_source_port_by_name = pa_context_set_source_port_by_name;
     extern fn pa_context_set_source_port_by_name(c: *context, name: [*:0]const u8, port: [*:0]const u8, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-    pub const get_server_info = pa_context_get_server_info;
+
+    pub fn get_server_info(c: *context, cb: server_info_cb_t, userdata: ?*anyopaque) error{OutOfMemory}!*operation {
+        return pa_context_get_server_info(c, cb, userdata) orelse return error.OutOfMemory;
+    }
     extern fn pa_context_get_server_info(c: *context, cb: server_info_cb_t, userdata: ?*anyopaque) ?*operation;
+
     pub const get_module_info = pa_context_get_module_info;
     extern fn pa_context_get_module_info(c: *context, idx: u32, cb: module_info_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const get_module_info_list = pa_context_get_module_info_list;
@@ -1034,22 +1133,29 @@ pub const mainloop = opaque {
     pub const set_poll_func = pa_mainloop_set_poll_func;
     extern fn pa_mainloop_set_poll_func(m: ?*mainloop, poll_func: poll_func, userdata: ?*anyopaque) void;
 };
-pub const subscription_event_type_t = enum(c_uint) {
-    SINK = 0,
-    SOURCE = 1,
-    SINK_INPUT = 2,
-    SOURCE_OUTPUT = 3,
-    MODULE = 4,
-    CLIENT = 5,
-    SAMPLE_CACHE = 6,
-    SERVER = 7,
-    AUTOLOAD = 8,
-    CARD = 9,
-    FACILITY_MASK = 15,
-    NEW = 0,
-    CHANGE = 16,
-    REMOVE = 32,
-    TYPE_MASK = 48,
+pub const subscription_event_type_t = packed struct(c_uint) {
+    facility: Facility,
+    type: Type,
+    _: u26 = 0,
+
+    pub const Facility = enum(u4) {
+        SINK = 0,
+        SOURCE = 1,
+        SINK_INPUT = 2,
+        SOURCE_OUTPUT = 3,
+        MODULE = 4,
+        CLIENT = 5,
+        SAMPLE_CACHE = 6,
+        SERVER = 7,
+        AUTOLOAD = 8,
+        CARD = 9,
+    };
+
+    pub const Type = enum(u2) {
+        NEW = 0,
+        CHANGE = 1,
+        REMOVE = 2,
+    };
 };
 pub const poll_func = ?*const fn (?*std.c.pollfd, c_ulong, c_int, ?*anyopaque) callconv(.c) c_int;
 
