@@ -58,6 +58,13 @@ pub fn main() !void {
                 else => continue,
             }
         }
+
+        const subscribe_op = try context.subscribe(.{
+            .SINK = true,
+            .SOURCE = true,
+            .SERVER = true,
+        }, null, null);
+        subscribe_op.unref();
     }
 
     while (true) {

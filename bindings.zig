@@ -575,8 +575,12 @@ pub const context = opaque {
     extern fn pa_context_remove_autoload_by_name(c: *context, name: [*:0]const u8, @"type": autoload_type_t, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
     pub const remove_autoload_by_index = pa_context_remove_autoload_by_index;
     extern fn pa_context_remove_autoload_by_index(c: *context, idx: u32, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
-    pub const subscribe = pa_context_subscribe;
+
+    pub fn subscribe(c: *context, m: subscription_mask_t, cb: context_success_cb_t, userdata: ?*anyopaque) error{OutOfMemory}!*operation {
+        return pa_context_subscribe(c, m, cb, userdata) orelse return error.OutOfMemory;
+    }
     extern fn pa_context_subscribe(c: *context, m: subscription_mask_t, cb: context_success_cb_t, userdata: ?*anyopaque) ?*operation;
+
     pub const set_subscribe_callback = pa_context_set_subscribe_callback;
     extern fn pa_context_set_subscribe_callback(c: *context, cb: context_subscribe_cb_t, userdata: ?*anyopaque) void;
     pub const remove_sample = pa_context_remove_sample;
@@ -1089,20 +1093,21 @@ pub const autoload_type_t = enum(c_uint) {
     SINK = 0,
     SOURCE = 1,
 };
-pub const subscription_mask_t = enum(c_uint) {
-    NULL = 0,
-    SINK = 1,
-    SOURCE = 2,
-    SINK_INPUT = 4,
-    SOURCE_OUTPUT = 8,
-    MODULE = 16,
-    CLIENT = 32,
-    SAMPLE_CACHE = 64,
-    SERVER = 128,
-    AUTOLOAD = 256,
-    CARD = 512,
-    ALL = 767,
+
+pub const subscription_mask_t = packed struct(c_uint) {
+    SINK: bool = false,
+    SOURCE: bool = false,
+    SINK_INPUT: bool = false,
+    SOURCE_OUTPUT: bool = false,
+    MODULE: bool = false,
+    CLIENT: bool = false,
+    SAMPLE_CACHE: bool = false,
+    SERVER: bool = false,
+    AUTOLOAD: bool = false,
+    CARD: bool = false,
+    _: u22 = 0,
 };
+
 pub const mainloop = opaque {
     pub fn new() error{OutOfMemory}!*mainloop {
         return pa_mainloop_new() orelse return error.OutOfMemory;
