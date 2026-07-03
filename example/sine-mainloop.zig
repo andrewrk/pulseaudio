@@ -55,7 +55,7 @@ pub fn main() !void {
         };
         const channel_map: pa.channel_map = .{
             .channels = 2,
-            .map = .{ .LEFT, .RIGHT } ++ .{.INVALID} ** 30,
+            .map = .{ .LEFT, .RIGHT } ++ @as([30]pa.channel_position_t, @splat(.INVALID)),
         };
         const stream = try pa.stream.new_with_proplist(context, "main stream", &sample_spec, &channel_map, props);
 

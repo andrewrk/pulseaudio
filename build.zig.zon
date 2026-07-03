@@ -1,8 +1,8 @@
 .{
     .name = .pulseaudio,
-    .version = "16.1.1-9",
+    .version = "16.1.1-10",
     .fingerprint = 0x73554b57d8fa4f9a,
-    .minimum_zig_version = "0.16.0-dev.2267+27e8d05ee",
+    .minimum_zig_version = "0.17.0-dev.1249+358c43939",
     .dependencies = .{},
     .paths = .{
         "GPL",

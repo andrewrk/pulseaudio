@@ -163,7 +163,12 @@ pub fn build(b: *std.Build) void {
     const version_header = b.addConfigHeader(.{
         .style = .{ .cmake = b.path("src/pulse/version.h.in") },
         .include_path = "pulse/version.h",
-    }, config_values);
+    }, .{
+        .PA_MAJOR = 16,
+        .PA_MINOR = 1,
+        .PA_API_VERSION = 12,
+        .PA_PROTOCOL_VERSION = 35,
+    });
 
     lib.root_module.addConfigHeader(version_header);
 
